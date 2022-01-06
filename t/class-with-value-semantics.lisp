@@ -1,0 +1,63 @@
+(in-package #:value-semantics-utils/test)
+
+(defclass test-class-with-value-semantics ()
+  ((slot-1 :initarg :slot-1)
+   (slot-2 :initarg :slot-2))
+  (:metaclass vs:class-with-value-semantics))
+
+(defparameter *validate-superclass-thunk*
+  `(lambda ()
+     (defclass other-test-class (test-class-with-value-semantics) ()
+       (:metaclass standard-class))))
+
+(define-test validate-superclass-failure :parent value-semantics
+  (let ((thunk (compile nil *validate-superclass-thunk*)))
+    (fail (funcall thunk))))
+
+(define-test class-with-value-semantics-true :parent value-semantics
+  (flet ((make (&rest args)
+           (apply #'make-instance 'test-class-with-value-semantics args)))
+    (let ((x (make))
+          (y (make)))
+      (is vs:eqv x y))
+    (let ((x (make :slot-1 1))
+          (y (make :slot-1 1)))
+      (is vs:eqv x y))
+    (let ((x (make :slot-2 2))
+          (y (make :slot-2 2)))
+      (is vs:eqv x y))
+    (let ((x (make :slot-1 1 :slot-2 2))
+          (y (make :slot-1 1 :slot-2 2)))
+      (is vs:eqv x y))
+    (let* ((x (make))
+           (y (make)))
+      (setf (slot-value x 'slot-1) y
+            (slot-value y 'slot-1) x)
+      (is vs:eqv x y))))
+
+(define-test class-with-value-semantics-false :parent value-semantics
+  (flet ((make (&rest args)
+           (apply #'make-instance 'test-class-with-value-semantics args)))
+    (let ((x (make :slot-1 1))
+          (y (make)))
+      (isnt vs:eqv x y))
+    (let ((x (make :slot-1 1))
+          (y (make :slot-1 2)))
+      (isnt vs:eqv x y))
+    (let ((x (make :slot-1 1))
+          (y (make :slot-2 1)))
+      (isnt vs:eqv x y))
+    (let ((x (make))
+          (y (make :slot-1 1 :slot-2 2)))
+      (isnt vs:eqv x y))
+    (let ((x (make :slot-1 1))
+          (y (make :slot-1 1 :slot-2 2)))
+      (isnt vs:eqv x y))
+    (let ((x (make :slot-1 1 :slot-2 2))
+          (y (make :slot-1 1 :slot-2 3)))
+      (isnt vs:eqv x y))
+    (let* ((x (make))
+           (y (make :slot-2 42)))
+      (setf (slot-value x 'slot-1) x
+            (slot-value y 'slot-1) x)
+      (isnt vs:eqv x y))))
