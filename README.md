@@ -14,6 +14,13 @@ Utilities for adjusting CLOS for mostly-functional programming. Includes:
 * `typechecked-class-with-value-semantics`, a composition of the above
   metaclasses.
 
+## TODO
+
+* Rationale and examples and manual
+* Write remaining tests
+* Wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed and
+  unskip a test that depends on it
+
 ## License
 
 MIT.
