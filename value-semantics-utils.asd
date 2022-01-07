@@ -13,7 +13,8 @@
                (:file "class-with-value-semantics")
                (:file "always-bound-class")
                (:file "typechecked-class")
-               (:file "typechecked-class-with-value-semantics"))
+               (:file "typechecked-class-with-value-semantics")
+               (:file "documentation"))
   :in-order-to ((test-op (load-op :value-semantics-utils/test)))
   :perform
   (test-op (o c)
