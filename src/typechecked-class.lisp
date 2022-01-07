@@ -15,7 +15,8 @@
 
 (defclass typechecked-effective-slot-definition
     (standard-effective-slot-definition typechecked-slot-definition)
-  ((typecheck-function :reader typecheck-function)))
+  ((%slot-definition-typecheck-function
+    :accessor slot-definition-typecheck-function)))
 
 (defmethod effective-slot-definition-class
     ((class typechecked-class) &key &allow-other-keys)
@@ -27,11 +28,11 @@
          (type (slot-definition-type esd))
          (typecheck-function
            (compile nil `(lambda (,name) (check-type ,name ,type) ,name))))
-    (setf (slot-value esd 'typecheck-function) typecheck-function)
+    (setf (slot-definition-typecheck-function esd) typecheck-function)
     esd))
 
 (defmethod (setf slot-value-using-class) :around
     (new-value (class typechecked-class) object
      (slot typechecked-effective-slot-definition))
-  (setf new-value (funcall (typecheck-function slot) new-value))
+  (setf new-value (funcall (slot-definition-typecheck-function slot) new-value))
   (call-next-method new-value class object slot))
