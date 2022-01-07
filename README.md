@@ -23,7 +23,9 @@ Utilities for adjusting CLOS for mostly-functional programming, including:
 ## TODO
 
 * Rationale and examples and manual
-* Handle and test U-I-F-D-C and U-I-F-R-C
+* Handle and test for `reinitialize-instance`
+* Handle and test for `update-instance-for-redefined-class`
+* Handle and test for `update-instance-for-different-class`
 * Wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed and
   unskip a test that depends on it
 
