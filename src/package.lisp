@@ -1,6 +1,7 @@
 (uiop:define-package #:value-semantics-utils
   (:use #:c2cl)
-  (:local-nicknames (#:a #:alexandria))
+  (:local-nicknames (#:a #:alexandria)
+                    (#:u #:moptilities))
   (:export
    ;; EQV
    #:eqv #:eqv-using-class

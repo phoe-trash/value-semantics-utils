@@ -8,9 +8,6 @@
 (defmethod validate-superclass ((c typechecked-class) (s standard-class))
   t)
 
-(defmethod validate-superclass ((c standard-class) (s typechecked-class))
-  t)
-
 (defclass typechecked-slot-definition (standard-slot-definition) ())
 
 (defclass typechecked-effective-slot-definition
@@ -18,8 +15,8 @@
   ((%slot-definition-typecheck-function
     :accessor slot-definition-typecheck-function)))
 
-(defmethod effective-slot-definition-class
-    ((class typechecked-class) &key &allow-other-keys)
+(defmethod effective-slot-definition-class ((c typechecked-class) &rest args)
+  (declare (ignore args))
   (find-class 'typechecked-effective-slot-definition))
 
 (defmethod compute-effective-slot-definition

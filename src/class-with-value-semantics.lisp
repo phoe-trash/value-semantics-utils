@@ -12,7 +12,7 @@
 (defun slot-based-eqv (x y)
   (declare (optimize speed))
   (flet ((fail () (return-from slot-based-eqv nil)))
-    (let* ((slots (mopu:slot-names (class-of x))))
+    (let* ((slots (u:slot-names (class-of x))))
       (dolist (slot slots t)
         (let ((boundp-x (slot-boundp x slot))
               (boundp-y (slot-boundp y slot)))

@@ -1,6 +1,6 @@
 # VALUE-SEMANTICS-UTILS
 
-Utilities for adjusting CLOS for mostly-functional programming. Includes:
+Utilities for adjusting CLOS for mostly-functional programming, including:
 
 * `eqv`, an equivalence predicate that acts mostly like `equal`
   except it is extensible and does not hang on cycles;
@@ -28,4 +28,3 @@ Utilities for adjusting CLOS for mostly-functional programming. Includes:
 ## License
 
 MIT.
-

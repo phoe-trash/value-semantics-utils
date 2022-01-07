@@ -30,7 +30,7 @@
   :license  "MIT"
   :version "0.0.1"
   :serial t
-  :depends-on (#:alexandria #:parachute)
+  :depends-on (#:alexandria #:parachute #:closer-mop #:moptilities)
   :pathname "t"
   :components ((:file "package")
                (:file "eqv")
