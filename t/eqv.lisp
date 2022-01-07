@@ -1,6 +1,6 @@
 (in-package #:value-semantics-utils/test)
 
-(define-test eqv :parent value-semantics)
+(define-test eqv :parent value-semantics-utils)
 
 (define-test eqv-default-method :parent eqv
   (let ((conditions '()))
@@ -27,14 +27,10 @@
     (is vs:eqv 42 42)
     (is vs:eqv 42 42.0)
     (is vs:eqv 42.0 42.0)
-    ;;(isnt vs:eqv 42 43)
     (is vs:eqv #C(4 2) #C(4 2))
     (is vs:eqv #\C #\C)
-    ;;(isnt vs:eqv #\C #\c)
     (is vs:eqv "Hello" "Hello")
-    ;;(isnt vs:eqv "Hello" "HELLO")
     (is vs:eqv #P"foo/bar.baz" #P"foo/bar.baz")
-    ;;(isnt vs:eqv #P"foo/bar.baz" #P"foo/bar.quux")
     (is vs:eqv (cons 1 2) (cons 1 2))
     (is vs:eqv (list* 1 2 3 4 5) (list* 1 2 3 4 5))
     (is vs:eqv

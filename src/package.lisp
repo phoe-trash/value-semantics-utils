@@ -15,4 +15,6 @@
    #:typechecked-class
    #:typechecked-slot-definition
    #:typechecked-effective-slot-definition #:typecheck-function
+   ;; TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS
+   #:typechecked-class-with-value-semantics
    ))

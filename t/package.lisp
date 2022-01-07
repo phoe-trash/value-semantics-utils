@@ -6,4 +6,4 @@
 
 (in-package #:value-semantics-utils/test)
 
-(define-test value-semantics)
+(define-test value-semantics-utils)

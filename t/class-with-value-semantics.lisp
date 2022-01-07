@@ -10,11 +10,11 @@
      (defclass other-test-class (test-class-with-value-semantics) ()
        (:metaclass standard-class))))
 
-(define-test validate-superclass-failure :parent value-semantics
+(define-test validate-superclass-failure :parent value-semantics-utils
   (let ((thunk (compile nil *validate-superclass-thunk*)))
     (fail (funcall thunk))))
 
-(define-test class-with-value-semantics-true :parent value-semantics
+(define-test class-with-value-semantics-true :parent value-semantics-utils
   (flet ((make (&rest args)
            (apply #'make-instance 'test-class-with-value-semantics args)))
     (let ((x (make))
@@ -35,7 +35,7 @@
             (slot-value y 'slot-1) x)
       (is vs:eqv x y))))
 
-(define-test class-with-value-semantics-false :parent value-semantics
+(define-test class-with-value-semantics-false :parent value-semantics-utils
   (flet ((make (&rest args)
            (apply #'make-instance 'test-class-with-value-semantics args)))
     (let ((x (make :slot-1 1))

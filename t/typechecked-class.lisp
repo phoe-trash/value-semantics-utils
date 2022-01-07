@@ -10,4 +10,15 @@
            :type keyword))
   (:metaclass vs:typechecked-class))
 
-;;; TODO
+(define-test typechecked-class :parent value-semantics-utils
+  (flet ((make (&rest args)
+           (apply #'make-instance 'test-typechecked-class args)))
+    (fail (make) unbound-slot)
+    (fail (make :slot-2 :foo) type-error)
+    (fail (make :slot-2 42) type-error)
+    (fail (make :slot-2 nil) unbound-slot)
+    (fail (make :slot-2 nil :slot-3 'foo) type-error)
+    (let ((instance (make :slot-2 nil :slot-3 :foo)))
+      (fail (slot-makunbound instance 'slot-1) unbound-slot)
+      (fail (slot-makunbound instance 'slot-2) unbound-slot)
+      (fail (slot-makunbound instance 'slot-3) unbound-slot))))

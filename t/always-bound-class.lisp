@@ -4,7 +4,7 @@
   ((slot :initarg :slot))
   (:metaclass vs:always-bound-class))
 
-(define-test always-bound-class :parent value-semantics
+(define-test always-bound-class :parent value-semantics-utils
   (fail (make-instance 'test-always-bound-class) 'unbound-slot)
   (let (instance)
     (handler-bind ((unbound-slot (lambda (c) (use-value 42 c))))

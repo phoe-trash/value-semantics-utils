@@ -17,7 +17,6 @@ Utilities for adjusting CLOS for mostly-functional programming. Includes:
 ## TODO
 
 * Rationale and examples and manual
-* Write remaining tests
 * Wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed and
   unskip a test that depends on it
 
