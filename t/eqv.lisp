@@ -120,3 +120,22 @@
       (isnt vs:eqv x y))
     (let ((*test-class-eqv* t))
       (is vs:eqv x y))))
+
+(defclass eqv-cycle-test () (slot))
+
+(defvar *count* 0)
+
+(defmethod vs:eqv-using-class ((x eqv-cycle-test) (y eqv-cycle-test))
+  (when (> *count* 100)
+    (throw 'successful t))
+  (let ((*count* (1+ *count*)))
+    (vs:eqv-using-class (slot-value x 'slot) (slot-value y 'slot))))
+
+(define-test eqv-no-cycle :parent eqv
+  (let ((vs:*eqv-resolve-cycles-p* nil)
+        (x (make-instance 'eqv-cycle-test))
+        (y (make-instance 'eqv-cycle-test)))
+    (setf (slot-value x 'slot) x
+          (slot-value y 'slot) y)
+    (let ((result (catch 'successful (vs:eqv x y) nil)))
+      (true result))))

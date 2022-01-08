@@ -6,6 +6,7 @@
    ;; EQV
    #:eqv
    #:eqv-using-class
+   #:*eqv-resolve-cycles-p*
    #:*eqv-default-method-behavior*
    #:eqv-default-method-called
    #:eqv-default-method-called-args

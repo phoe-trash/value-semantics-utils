@@ -1,30 +1,53 @@
 # VALUE-SEMANTICS-UTILS
 
-Utilities for adjusting CLOS for mostly-functional programming, including:
+Utilities for adjusting CLOS for mostly-functional programming.
 
+## Why?
+
+The following assumptions:
+
+* Value semantics are used to compare data.
+* The only exception to using value semantics is cycle detection in data structures.
+
+## Exports
+
+### Equivalence
 * **Function `EQV`** - an equivalence predicate that acts mostly like `EQUAL`
   except it is extensible and does not hang on cycles;
   * **Generic Function `EQV-USING-CLASS`** - a means of programming `EQV`;
+  * **Variable `*EQV-RESOLVE-CYCLES-P*`** - a dynamic variable controlling whether
+    `EQV` will check object identity to detect cycles, defaults to true;
   * **Variable `*EQV-DEFAULT-METHOD-BEHAVIOR*`** - a dynamic variable controlling
-    the signaling behavior of the default method on `EQV-USING-CLASS`;
+    the signaling behavior of the default method on `EQV-USING-CLASS`, defaults to
+    the symbol `WARN`;
   * **Condition Type `EQV-DEFAULT-METHOD-CALLED`** - a condition optionally signaled
     when the default method on `EQV-USING-CLASS` is called;
     * **Reader Function `EQV-DEFAULT-METHOD-CALLED-ARGS`** - a reader function for
-      the arguments with which the default method on `EQV-USING-CLASS` was called;
-* **Class `CLASS-WITH-VALUE-SEMANTICS`** - a metaclass which automatically adds
-  `EQV-USING-CLASS` methods specialized on the class being defined;
+      the arguments with which the default method on `EQV-USING-CLASS` was called.
+
+### Value semantics
+* **Class `CLASS-WITH-VALUE-SEMANTICS`** - a metaclass whose metainstances are
+  automatically comparable slotwise via `EQV`;
   * **Class `OBJECT-WITH-VALUE-SEMANTICS`** - an automatic subclass of all instances
-    of every `CLASS-WITH-VALUE-SEMANTICS`;
-* **Class `ALWAYS-BOUND-CLASS`** - a metaclass whose instances cannot have their
-  slots unbound at any time;
+    of every `CLASS-WITH-VALUE-SEMANTICS`.
+
+### Always-bound
+* **Class `ALWAYS-BOUND-CLASS`** - a metaclass whose instances are meant to never
+  have their slots unbound whatsoever;
   * **Class `ALWAYS-BOUND-OBJECT`** - an automatic subclass of all instances
-    of every `ALWAYS-BOUND-CLASS`;
+    of every `ALWAYS-BOUND-CLASS`.
+
+### Typechecking
 * **Class `TYPECHECKED-CLASS`** - an `ALWAYS-BOUND-CLASS` with mandatory runtime
   typechecking for slot values;
   * **Class `TYPECHECKED-OBJECT`** - an automatic subclass of all instances
-    of every `TYPECHECKED-CLASS`;
+    of every `TYPECHECKED-CLASS`.
+
+### The final form™
 * **Class `TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS`** - a composition of the above
   three metaclasses.
+
+## Manual
 
 ## TODO
 

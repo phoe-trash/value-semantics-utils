@@ -1,27 +1,30 @@
 (in-package #:value-semantics-utils)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; API
+;;; EQ case and cycle handling
 
 (defvar *eqv-state*)
+
+(defvar *eqv-resolve-cycles-p* t)
 
 (defun eqv (x y)
   (when (boundp '*eqv-state*)
     (error "Bug: EQV called again from inside EQV."))
-  (let ((*eqv-state* (make-hash-table)))
-    (eqv-using-class x y)))
+  (if *eqv-resolve-cycles-p*
+      (let ((*eqv-state* (make-hash-table)))
+        (eqv-using-class x y))
+      (eqv-using-class x y)))
 
 (defgeneric eqv-using-class (x y))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; EQ case and cycle handling
-
 (defmethod eqv-using-class :around (x y)
-  (or (eq x y)
-      (multiple-value-bind (value foundp) (gethash x *eqv-state*)
-        (cond (foundp (eql value y))
-              (t (setf (gethash x *eqv-state*) y)
-                 (call-next-method))))))
+  (if *eqv-resolve-cycles-p*
+      (or (eq x y)
+          (multiple-value-bind (value foundp) (gethash x *eqv-state*)
+            (cond (foundp (eql value y))
+                  (t (setf (gethash x *eqv-state*) y)
+                     (call-next-method)))))
+      (call-next-method)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Default method called - condition
