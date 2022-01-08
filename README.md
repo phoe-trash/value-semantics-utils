@@ -12,8 +12,9 @@ The following assumptions:
 ## Exports
 
 ### Equivalence
-* **Function `EQV`** - an equivalence predicate that acts mostly like `EQUAL`
-  except it is extensible and does not hang on cycles;
+* **Function `EQV`**
+An equivalence predicate that acts mostly like `EQUAL`
+except it is extensible and does not hang on cycles;
   * **Generic Function `EQV-USING-CLASS`** - a means of programming `EQV`;
   * **Variable `*EQV-RESOLVE-CYCLES-P*`** - a dynamic variable controlling whether
     `EQV` will check object identity to detect cycles, defaults to true;
