@@ -71,3 +71,17 @@
            (is = 24 (slot-value instance 'slot-2))
            (is = 0 (slot-value instance 'slot-3))))
     (setf (find-class 'test-always-bound-class-u-i-f-r-c nil) nil)))
+
+(defclass simple-class ()
+  ((other-slot :initform 42)))
+
+(define-test always-bound-class-update-instance-for-different-class
+  :parent always-bound-class
+  (let ((instance (make-instance 'simple-class)))
+    (fail (change-class instance 'test-always-bound-class) unbound-slot)
+    (true (typep instance 'simple-class))
+    (is = 42 (slot-value instance 'other-slot))
+    (change-class instance 'test-always-bound-class
+                  :slot 24)
+    (true (typep instance 'test-always-bound-class))
+    (is = 24 (slot-value instance 'slot))))
