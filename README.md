@@ -42,6 +42,9 @@ Trust me, I'm an engineer.
 
 (in-package #:sb-pcl)
 
+(defmacro wrapper-class (wrapper)
+  `(classoid-pcl-class (wrapper-classoid ,wrapper)))
+
 (sb-ext:without-package-locks
   (defun slot-makunbound (object slot-name)
     (let* ((class (class-of object))
@@ -90,9 +93,6 @@ Trust me, I'm an engineer.
             (t
              (bug "Bogus slot-cell in SLOT-MAKUNBOUND: ~S" cell))))
     object))
-
-(defmacro wrapper-class (wrapper)
-  `(classoid-pcl-class (wrapper-classoid ,wrapper)))
 
 (macrolet ((replace-wrapper-and-slots (thing layout slot-vector)
              `(if (functionp ,thing)
