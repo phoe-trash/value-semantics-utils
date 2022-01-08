@@ -118,7 +118,7 @@ To be done. Take a look at [the tests](t/) for the time being.
 
 ## TODO
 
-* Examples and manual
+* Examples
 * Wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed and
   unskip a test that depends on it
 
