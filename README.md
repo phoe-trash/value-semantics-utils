@@ -23,45 +23,71 @@ For such a programming style, the following assumptions should hold true:
 
 This repository contains a series of utilities meant to facilitate this style of programming.
 
-## Exports
+## Manual
 
 ### Equivalence
-* **Function `EQV`** - an equivalence predicate that acts mostly like `EQUAL`
-  except it is extensible and does not hang on cycles;
-  * **Generic Function `EQV-USING-CLASS`** - a means of programming `EQV`;
-  * **Variable `*EQV-RESOLVE-CYCLES-P*`** - a dynamic variable controlling whether
-    `EQV` will check object identity to detect cycles, defaults to true;
-  * **Variable `*EQV-DEFAULT-METHOD-BEHAVIOR*`** - a dynamic variable controlling
-    the signaling behavior of the default method on `EQV-USING-CLASS`, defaults to
-    the symbol `WARN`;
-  * **Condition Type `EQV-DEFAULT-METHOD-CALLED`** - a condition optionally signaled
-    when the default method on `EQV-USING-CLASS` is called;
-    * **Reader Function `EQV-DEFAULT-METHOD-CALLED-ARGS`** - a reader function for
-      the arguments with which the default method on `EQV-USING-CLASS` was called.
+
+* **Function `EQV`** - `(eqv x y)`
+
+An equivalence predicate that acts mostly like `EQUAL`. It is extensible and can be configured to not hang on cycles and to signal or not signal in case of fallthrough to the default method.
+
+* **Generic Function `EQV-USING-CLASS`** (eqv-using-class x y)
+
+A means of programming `EQV`. Not meant to be called directly; programmers can write methods for it though.
+
+* **Variable `*EQV-RESOLVE-CYCLES-P*`** 
+
+A dynamic variable controlling whether `EQV` will check object identity to detect cycles. Defaults to true.
+
+* **Variable `*EQV-DEFAULT-METHOD-BEHAVIOR*`**
+
+A dynamic variable controlling the signaling behavior of the default method on `EQV-USING-CLASS`. Allowed values are `NIL`, `SIGNAL`, `WARN`, and `ERROR` or any function which mimics the function signature of `SIGNAL`. Defaults to the symbol `WARN`.
+
+* **Condition Type `EQV-DEFAULT-METHOD-CALLED`**
+
+A condition optionally signaled (see `*EQV-DEFAULT-METHOD-BEHAVIOR*`) when the default method on `EQV-USING-CLASS` is called.
+
+* **Reader Function `EQV-DEFAULT-METHOD-CALLED-ARGS`**
+
+A reader function for the arguments with which the default method on `EQV-USING-CLASS` was called.
 
 ### Value semantics
-* **Class `CLASS-WITH-VALUE-SEMANTICS`** - a metaclass whose metainstances are
-  automatically comparable slotwise via `EQV`;
-  * **Class `OBJECT-WITH-VALUE-SEMANTICS`** - an automatic subclass of all instances
-    of every `CLASS-WITH-VALUE-SEMANTICS`.
+
+* **Class `CLASS-WITH-VALUE-SEMANTICS`**
+
+A metaclass whose metainstances are automatically comparable slotwise via `EQV`.
+
+* **Class `OBJECT-WITH-VALUE-SEMANTICS`**
+
+An automatic subclass of all instances of every `CLASS-WITH-VALUE-SEMANTICS`.
 
 ### Always-bound
-* **Class `ALWAYS-BOUND-CLASS`** - a metaclass whose instances are meant to never
-  have their slots unbound whatsoever;
-  * **Class `ALWAYS-BOUND-OBJECT`** - an automatic subclass of all instances
-    of every `ALWAYS-BOUND-CLASS`.
+
+* **Class `ALWAYS-BOUND-CLASS`**
+
+A metaclass whose instances are meant to never have their slots unbound whatsoever.
+
+* **Class `ALWAYS-BOUND-OBJECT`**
+
+An automatic subclass of all instances of every `ALWAYS-BOUND-CLASS`.
 
 ### Typechecking
-* **Class `TYPECHECKED-CLASS`** - an `ALWAYS-BOUND-CLASS` with mandatory runtime
-  typechecking for slot values;
-  * **Class `TYPECHECKED-OBJECT`** - an automatic subclass of all instances
-    of every `TYPECHECKED-CLASS`.
+
+* **Class `TYPECHECKED-CLASS`**
+
+A metaclass with mandatory runtime typechecking for slot values. Subclasses `ALWAYS-BOUND-CLASS`.
+
+* **Class `TYPECHECKED-OBJECT`**
+
+An automatic subclass of all instances of every `TYPECHECKED-CLASS`.
 
 ### The final form™
-* **Class `TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS`** - a composition of the above
-  three metaclasses.
 
-## Manual
+* **Class `TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS`**
+
+A metaclass composing the above three metaclasses.
+
+## Examples
 
 To be done. Take a look at [the tests](t/) for the time being.
 
