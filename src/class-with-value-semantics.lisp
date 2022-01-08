@@ -16,13 +16,15 @@
         (dolist (slot slots t)
           (let ((boundp-x (slot-boundp x slot))
                 (boundp-y (slot-boundp y slot)))
-            (cond ((and boundp-x (not boundp-y)) (fail))
-                  ((and boundp-y (not boundp-x)) (fail))
-                  ((and boundp-x boundp-y
-                        (not (eqv-using-class (slot-value x slot)
-                                              (slot-value y slot))))
-                   (fail))
-                  ((and (not boundp-x) (not boundp-y))))))))))
+            (cond
+              ;; Both slots bound with EQV values.
+              ((and boundp-x boundp-y
+                    (eqv-using-class (slot-value x slot)
+                                     (slot-value y slot))))
+              ;; Both slots unbound.
+              ((and (not boundp-x) (not boundp-y)))
+              ;; All other cases are not EQV.
+              (t (fail)))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CLASS-WITH-VALUE-SEMANTICS

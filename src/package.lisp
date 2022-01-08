@@ -4,7 +4,8 @@
                     (#:u #:moptilities))
   (:export
    ;; EQV
-   #:eqv #:eqv-using-class
+   #:eqv
+   #:eqv-using-class
    #:*eqv-default-method-behavior*
    #:eqv-default-method-called
    #:eqv-default-method-called-x
@@ -16,9 +17,7 @@
    #:always-bound-object
    #:always-bound-class
    ;; TYPECHECKED-CLASS
+   #:typechecked-object
    #:typechecked-class
-   #:typechecked-slot-definition
-   #:typechecked-effective-slot-definition
-   #:slot-definition-typecheck-function
    ;; TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS
    #:typechecked-class-with-value-semantics))

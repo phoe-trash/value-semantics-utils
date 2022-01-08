@@ -26,3 +26,5 @@
       (fail (slot-makunbound instance 'slot-3) unbound-slot)
       (is vs:eqv (make :slot-2 nil :slot-3 :foo) instance)
       (isnt vs:eqv (make :slot-2 nil :slot-3 :bar) instance))))
+
+;; TODO repeat tests for child metaclasses

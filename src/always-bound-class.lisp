@@ -34,12 +34,13 @@
 
 (defmethod slot-makunbound-using-class :around
     ((class always-bound-class) object slotd)
-  (if (not (slot-boundp-using-class class object slotd))
-      (call-next-method)
-      (let* ((old-value (slot-value-using-class class object slotd)))
+  (if (slot-boundp-using-class class object slotd)
+      (let ((old-value (slot-value-using-class class object slotd)))
         (unwind-protect
              (progn (call-next-method)
                     (setf (slot-value-using-class class object slotd)
                           (slot-value-using-class class object slotd)))
           (unless (slot-boundp-using-class class object slotd)
-            (setf (slot-value-using-class class object slotd) old-value))))))
+            (setf (slot-value-using-class class object slotd) old-value)))
+        object)
+      (call-next-method)))
