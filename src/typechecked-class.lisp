@@ -37,6 +37,7 @@
 (defmethod (setf slot-value-using-class) :around
     (new-value (class typechecked-class) object slotd)
   (let ((type (slot-definition-type slotd)))
+
     (assert (typep new-value type) (new-value)
             'type-error :datum new-value :expected-type type)
     (call-next-method new-value class object slotd)))
