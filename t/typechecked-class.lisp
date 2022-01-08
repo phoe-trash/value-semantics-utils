@@ -94,3 +94,13 @@
     (true (typep instance 'test-typechecked-class))
     (is eq nil (slot-value instance 'slot-2))
     (is eq :foo (slot-value instance 'slot-3))))
+
+(define-test typechecked-class-makunbound :parent typechecked-class
+  (let ((instance (make-instance 'test-typechecked-class
+                                 :slot-2 nil :slot-3 :foo)))
+    (fail (slot-makunbound instance 'slot-2) unbound-slot)
+    (fail (slot-makunbound instance 'slot-3) unbound-slot)
+    (fail (handler-bind ((unbound-slot (lambda (c) (store-value t c))))
+            (slot-makunbound instance 'slot-2)) type-error)
+    (fail (handler-bind ((unbound-slot (lambda (c) (store-value t c))))
+            (slot-makunbound instance 'slot-3)) type-error)))

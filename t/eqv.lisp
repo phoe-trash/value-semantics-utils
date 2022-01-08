@@ -10,7 +10,7 @@
           (false (vs:eqv 42 "42")))
         (is = 1 (length conditions))
         (let ((condition (first conditions)))
-          (is equal (42 "42") (vs:eqv-default-method-called-args condition)))
+          (is equal '(42 "42") (vs:eqv-default-method-called-args condition)))
         (let ((vs:*eqv-default-method-behavior* 'nil))
           (false (vs:eqv 42 "42")))
         (is = 1 (length conditions))))))

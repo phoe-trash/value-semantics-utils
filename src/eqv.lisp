@@ -27,13 +27,12 @@
 ;;; Default method called - condition
 
 (define-condition eqv-default-method-called (warning)
-  ((x :reader eqv-default-method-called-args :initarg :args))
+  ((args :reader eqv-default-method-called-args :initarg :args))
   (:default-initargs :args (a:required-argument :args))
-  (:report
-   (lambda (condition stream)
-     (format stream "EQV default method called with ~S; ~
-                     possible type error?"
-             (eqv-default-method-called-args condition)))))
+  (:report (lambda (condition stream)
+             (format stream "EQV default method called with ~S; ~
+                             possible type error?"
+                     (eqv-default-method-called-args condition)))))
 
 (defvar *eqv-default-method-behavior* 'warn)
 
