@@ -27,13 +27,35 @@ This repository contains a series of utilities meant to facilitate this style of
 
 ### Equivalence
 
-* **Function `EQV`** - `(eqv x y)`
+* **Function `EQV`**
+
+```lisp
+(eqv x y) → boolean
+```
 
 An equivalence predicate that acts mostly like `EQUAL`. It is extensible and can be configured to not hang on cycles and to signal or not signal in case of fallthrough to the default method.
 
-* **Generic Function `EQV-USING-CLASS`** (eqv-using-class x y)
+* **Generic Function `EQV-USING-CLASS`**
+
+```lisp
+(eqv-using-class x y) → boolean
+```
 
 A means of programming `EQV`. Not meant to be called directly; programmers can write methods for it though.
+
+Methods:
+  * `:AROUND (T T)` - is used to resolve cycles by memoizing object identity (via `EQ`) across a single `EQV` call;
+  * `(FUNCTION FUNCTION)` - compares via `EQ`;
+  * `(SYMBOL SYMBOL)` - compares via `EQ`;
+  * `(PACKAGE PACKAGE)` - compares via `EQ`;
+  * `(STREAM STREAM)` - compares via `EQ`;
+  * `(NUMBER NUMBER)` - compares via `=`;
+  * `(STRING STRING)` - compares via `STRING=`;
+  * `(PATHNAME PATHNAME)` - compares via `EQUAL`;
+  * `(CONS CONS)` - compares the `CAR` and `CDR` recursively via `EQV-USING-CLASS`;
+  * `(ARRAY ARRAY)` - compares array dimensions via `EQUAL`, then compares elements recursively via `EQV-USING-CLASS`;
+  * `(HASH-TABLE HASH-TABLE)` - compares hash table counts via `=`, then compares hash table test via `EQ`, then compares keys and values recursively via `EQV-USING-CLASS`;
+  * `(T T)` - maybe signals a `EQV-DEFAULT-METHOD-CALLED`, then returns `NIL`.
 
 * **Variable `*EQV-RESOLVE-CYCLES-P*`** 
 
@@ -60,6 +82,9 @@ A metaclass whose metainstances are automatically comparable slotwise via `EQV`.
 * **Class `OBJECT-WITH-VALUE-SEMANTICS`**
 
 An automatic subclass of all instances of every `CLASS-WITH-VALUE-SEMANTICS`.
+
+Methods on `EQV-USING-CLASS`:
+  * `(OBJECT-WITH-VALUE-SEMANTICS OBJECT-WITH-VALUE-SEMANTICS)` - compares the objects' classes via `EQ`, then recursively compares slot values via `EQV-USING-CLASS`.
 
 ### Always-bound
 

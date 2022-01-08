@@ -11,7 +11,7 @@
   (when (boundp '*eqv-state*)
     (error "Bug: EQV called again from inside EQV."))
   (if *eqv-resolve-cycles-p*
-      (let ((*eqv-state* (make-hash-table)))
+      (let ((*eqv-state* (make-hash-table :test #'eq)))
         (eqv-using-class x y))
       (eqv-using-class x y)))
 
