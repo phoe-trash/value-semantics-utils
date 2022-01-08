@@ -2,21 +2,27 @@
 
 Utilities for adjusting CLOS for mostly-functional programming, including:
 
-
 * **`eqv`**, an equivalence predicate that acts mostly like `equal`
   except it is extensible and does not hang on cycles;
-* **`eqv-using-class`**, a means of programming `eqv`;
+  * **`eqv-using-class`**, a means of programming `eqv`;
+  * **`*eqv-default-method-behavior*`**, a dynamic variable controlling the
+    signaling behavior of the default method on `eqv-using-class`;
+  * **`eqv-default-method-called`**, a condition optionally signaled when the
+    default method on `eqv-using-class` is called;
+    * **`eqv-default-method-called-args`**, a reader function for the arguments
+      with which the default method on `eqv-using-class` was called;
 * **`class-with-value-semantics`**, a metaclass which automatically adds
   `eqv-using-class` methods specialized on the class being defined;
+  * **`object-with-value-semantics`**, an automatic subclass of all instances
+    of every `class-with-value-semantics`;
 * **`always-bound-class`**, a metaclass whose instances cannot have their
   slots unbound at any time;
+  * **`always-bound-object`**, an automatic subclass of all instances
+    of every `always-bound-class`;
 * **`typechecked-class`**, an `always-bound-class` with mandatory runtime
   typechecking for slot values;
-  * **`typechecked-slot-definition`** and 
-    **`typechecked-effective-slot-definition`**,
-    slot definition classes for typechecked slots;
-  * **`slot-definition-typecheck-function`**, an accessor function for the
-    typecheck function of a typechecked slot;
+  * **`typechecked-object`**, an automatic subclass of all instances
+    of every `typechecked-class`;
 * **`typechecked-class-with-value-semantics`**, a composition of the above three
   metaclasses.
 

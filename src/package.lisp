@@ -8,8 +8,7 @@
    #:eqv-using-class
    #:*eqv-default-method-behavior*
    #:eqv-default-method-called
-   #:eqv-default-method-called-x
-   #:eqv-default-method-called-y
+   #:eqv-default-method-called-args
    ;; CLASS-WITH-VALUE-SEMANTICS
    #:object-with-value-semantics
    #:class-with-value-semantics
