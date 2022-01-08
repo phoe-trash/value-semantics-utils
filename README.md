@@ -63,7 +63,7 @@ This repository contains a series of utilities meant to facilitate this style of
 
 ## Manual
 
-To be done.
+To be done. Take a look at [the tests](t/) for the time being.
 
 ## TODO
 
