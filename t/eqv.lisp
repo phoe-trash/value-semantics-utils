@@ -106,19 +106,19 @@
           (a:alist-hash-table '((:a . 1) (:b . 2) (:c . 3))
                               :test 'equal))))
 
-(defclass test-class () ())
+(defclass eqv-test-class () ())
 
-(defvar *test-class-eqv*)
+(defvar *eqv-test-class-eqv*)
 
-(defmethod vs:eqv-using-class ((x test-class) (y test-class))
-  *test-class-eqv*)
+(defmethod vs:eqv-using-class ((x eqv-test-class) (y eqv-test-class))
+  *eqv-test-class-eqv*)
 
 (define-test eqv-custom-method :parent eqv
-  (let ((x (make-instance 'test-class))
-        (y (make-instance 'test-class)))
-    (let ((*test-class-eqv* nil))
+  (let ((x (make-instance 'eqv-test-class))
+        (y (make-instance 'eqv-test-class)))
+    (let ((*eqv-test-class-eqv* nil))
       (isnt vs:eqv x y))
-    (let ((*test-class-eqv* t))
+    (let ((*eqv-test-class-eqv* t))
       (is vs:eqv x y))))
 
 (defclass eqv-cycle-test () (slot))

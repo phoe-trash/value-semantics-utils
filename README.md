@@ -1,13 +1,27 @@
 # VALUE-SEMANTICS-UTILS
 
-Utilities for adjusting CLOS for mostly-functional programming.
+Utilities for using CLOS for mostly-functional programming.
 
 ## Why?
 
-The following assumptions:
+There are two worlds in programming: an imperative one, full of objects and comparisons by identity, and a functional one, full of referential transparency and comparisons by value. Common Lisp is good at both, and I ended up realizing that I wanted to develop a program which integrates both of these paradigms.
 
-* Value semantics are used to compare data.
-* The only exception to using value semantics is cycle detection in data structures.
+In particular, I want my data structures to be mostly immutable and the logic of my program to be pure and without side effects, but I'd like to structure my data via standard classes and have the possibility to mutate objects wherever it cannot be observed in the higher-level logic.
+
+For such a programming style, the following assumptions should hold true:
+
+* Data should be immutable and structure sharing should be common wherever possible.
+  * It should be possible to use imperative logic wherever doing so does not mutate existing data.
+* Data should be represented via primitive Common Lisp types and standard classes.
+  * It should be possible to use cyclic references for programming convenience.
+* Value semantics should be used to compare data for ~~equality~~equivalence. In particular, two classes should be equivalent if their types and contents are equivalent.
+  * The only exception to using pure value semantics should be cycle detection in data structures, for which there seems to be no solution better than identity comparison.
+    * (Thankfully, there are no generators or infinite lists in Lisp.)
+* There should be a way to ensure, on the MOP level, that a slot in an instance is...
+  * ...meant to be always bound,
+  * ...meant to always contain a value of a particular type.
+
+This repository contains a series of utilities meant to facilitate this style of programming.
 
 ## Exports
 
@@ -49,9 +63,11 @@ The following assumptions:
 
 ## Manual
 
+To be done.
+
 ## TODO
 
-* Rationale and examples and manual
+* Examples and manual
 * Wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed and
   unskip a test that depends on it
 
