@@ -11,7 +11,7 @@
      (defclass other-test-class (test-class-with-value-semantics) ()
        (:metaclass standard-class))))
 
-(define-test always-bound-classvalidate-superclass-failure
+(define-test always-bound-class-validate-superclass-failure
   :parent always-bound-class
   (let ((thunk (compile nil *always-bound-class-thunk*)))
     (fail (funcall thunk))))
@@ -23,8 +23,7 @@
   (let (instance)
     (handler-bind ((unbound-slot (lambda (c) (use-value 42 c))))
       (setf instance (make-instance 'test-always-bound-class))
-      (is = 42 (slot-value instance 'slot))
-      (true (typep instance 'vs:always-bound-object)))))
+      (is = 42 (slot-value instance 'slot)))))
 
 (define-test always-bound-class-store-value :parent always-bound-class
   (let (instance)
