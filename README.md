@@ -27,7 +27,7 @@ This repository contains a series of utilities meant to facilitate this style of
 
 ### Equivalence
 
-* **Function `EQV`**
+#### **Function `EQV`**
 
 ```lisp
 (eqv x y) → boolean
@@ -35,7 +35,7 @@ This repository contains a series of utilities meant to facilitate this style of
 
 An equivalence predicate that acts mostly like `EQUAL`. It is extensible and can be configured to not hang on cycles and to signal or not signal in case of fallthrough to the default method.
 
-* **Generic Function `EQV-USING-CLASS`**
+#### **Generic Function `EQV-USING-CLASS`**
 
 ```lisp
 (eqv-using-class x y) → boolean
@@ -57,29 +57,29 @@ Methods:
   * `(HASH-TABLE HASH-TABLE)` - compares hash table counts via `=`, then compares hash table test via `EQ`, then compares keys and values recursively via `EQV-USING-CLASS`;
   * `(T T)` - maybe signals a `EQV-DEFAULT-METHOD-CALLED`, then returns `NIL`.
 
-* **Variable `*EQV-RESOLVE-CYCLES-P*`** 
+#### **Variable `*EQV-RESOLVE-CYCLES-P*`** 
 
 A dynamic variable controlling whether `EQV` will check object identity to detect cycles. Defaults to true.
 
-* **Variable `*EQV-DEFAULT-METHOD-BEHAVIOR*`**
+#### **Variable `*EQV-DEFAULT-METHOD-BEHAVIOR*`**
 
 A dynamic variable controlling the signaling behavior of the default method on `EQV-USING-CLASS`. Allowed values are `NIL`, `SIGNAL`, `WARN`, and `ERROR` or any function which mimics the function signature of `SIGNAL`. Defaults to the symbol `WARN`.
 
-* **Condition Type `EQV-DEFAULT-METHOD-CALLED`**
+#### **Condition Type `EQV-DEFAULT-METHOD-CALLED`**
 
 A condition optionally signaled (see `*EQV-DEFAULT-METHOD-BEHAVIOR*`) when the default method on `EQV-USING-CLASS` is called.
 
-* **Reader Function `EQV-DEFAULT-METHOD-CALLED-ARGS`**
+#### **Reader Function `EQV-DEFAULT-METHOD-CALLED-ARGS`**
 
 A reader function for the arguments with which the default method on `EQV-USING-CLASS` was called.
 
 ### Value semantics
 
-* **Class `CLASS-WITH-VALUE-SEMANTICS`**
+#### **Class `CLASS-WITH-VALUE-SEMANTICS`**
 
 A metaclass whose metainstances are automatically comparable slotwise via `EQV`.
 
-* **Class `OBJECT-WITH-VALUE-SEMANTICS`**
+#### **Class `OBJECT-WITH-VALUE-SEMANTICS`**
 
 An automatic subclass of all instances of every `CLASS-WITH-VALUE-SEMANTICS`.
 
@@ -88,27 +88,27 @@ Methods on `EQV-USING-CLASS`:
 
 ### Always-bound
 
-* **Class `ALWAYS-BOUND-CLASS`**
+#### **Class `ALWAYS-BOUND-CLASS`**
 
 A metaclass whose instances are meant to never have their slots unbound whatsoever.
 
-* **Class `ALWAYS-BOUND-OBJECT`**
+#### **Class `ALWAYS-BOUND-OBJECT`**
 
 An automatic subclass of all instances of every `ALWAYS-BOUND-CLASS`.
 
 ### Typechecking
 
-* **Class `TYPECHECKED-CLASS`**
+#### **Class `TYPECHECKED-CLASS`**
 
 A metaclass with mandatory runtime typechecking for slot values. Subclasses `ALWAYS-BOUND-CLASS`.
 
-* **Class `TYPECHECKED-OBJECT`**
+#### **Class `TYPECHECKED-OBJECT`**
 
 An automatic subclass of all instances of every `TYPECHECKED-CLASS`.
 
 ### The final form™
 
-* **Class `TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS`**
+#### **Class `TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS`**
 
 A metaclass composing the above three metaclasses.
 
