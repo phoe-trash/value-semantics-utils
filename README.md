@@ -15,6 +15,7 @@ For such a programming style, the following assumptions should hold true:
 * Data should be represented via primitive Common Lisp types and standard classes.
   * It should be possible to use cyclic references for programming convenience.
 * It should be possible to consider a type mismatch an abnormal situation while comparing for equivalence.
+  * It should be possible to use `:type` arguments for class slots and have runtime assertions for type checks without risking undefined behavior or depending on implementation-defined behavior.
 * Value semantics should be used to compare data for ~~equality~~equivalence. In particular, two classes should be equivalent if their types and contents are equivalent.
   * The only exception to using pure value semantics should be cycle detection in data structures, for which there seems to be no solution better than identity comparison.
     * (Thankfully, there are no generators or infinite lists in Lisp.)
@@ -215,6 +216,28 @@ A metaclass with mandatory runtime typechecking for slot values. Subclasses `ALW
 #### **Class `TYPECHECKED-OBJECT`**
 
 An automatic subclass of all instances of every `TYPECHECKED-CLASS`.
+
+```lisp
+VALUE-SEMANTICS-UTILS> (defclass quux ()
+                         ((slot :initarg :slot :type integer))
+                         (:metaclass typechecked-class))
+#<TYPECHECKED-CLASS VALUE-SEMANTICS-UTILS::QUUX>
+
+VALUE-SEMANTICS-UTILS> (make-instance 'quux)
+;;; Error: The slot VALUE-SEMANTICS-UTILS::SLOT is unbound in the object #<QUUX {1005907C23}>.
+;;;   [Condition of type UNBOUND-SLOT]
+
+VALUE-SEMANTICS-UTILS> (make-instance 'quux :slot "42")
+;;; Error: The value "42" is not of type INTEGER.
+;;;   [Condition of type TYPE-ERROR]
+
+VALUE-SEMANTICS-UTILS> (make-instance 'quux :slot 42)
+#<QUUX {1005C9A643}>
+
+VALUE-SEMANTICS-UTILS> (setf (slot-value * 'slot) "42")
+;;; Error: The value "42" is not of type INTEGER.
+;;;   [Condition of type TYPE-ERROR]
+```
 
 For a typechecked object, the following should hold true:
 
