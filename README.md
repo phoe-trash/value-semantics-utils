@@ -2,29 +2,29 @@
 
 Utilities for adjusting CLOS for mostly-functional programming, including:
 
-* **`eqv`**, an equivalence predicate that acts mostly like `equal`
+* **Function `EQV`** - an equivalence predicate that acts mostly like `EQUAL`
   except it is extensible and does not hang on cycles;
-  * **`eqv-using-class`**, a means of programming `eqv`;
-  * **`*eqv-default-method-behavior*`**, a dynamic variable controlling the
-    signaling behavior of the default method on `eqv-using-class`;
-  * **`eqv-default-method-called`**, a condition optionally signaled when the
-    default method on `eqv-using-class` is called;
-    * **`eqv-default-method-called-args`**, a reader function for the arguments
-      with which the default method on `eqv-using-class` was called;
-* **`class-with-value-semantics`**, a metaclass which automatically adds
-  `eqv-using-class` methods specialized on the class being defined;
-  * **`object-with-value-semantics`**, an automatic subclass of all instances
-    of every `class-with-value-semantics`;
-* **`always-bound-class`**, a metaclass whose instances cannot have their
+  * **Generic Function `EQV-USING-CLASS`** - a means of programming `EQV`;
+  * **Variable `*EQV-DEFAULT-METHOD-BEHAVIOR*`** - a dynamic variable controlling
+    the signaling behavior of the default method on `EQV-USING-CLASS`;
+  * **Condition Type `EQV-DEFAULT-METHOD-CALLED`** - a condition optionally signaled
+    when the default method on `EQV-USING-CLASS` is called;
+    * **Reader Function `EQV-DEFAULT-METHOD-CALLED-ARGS`** - a reader function for
+      the arguments with which the default method on `EQV-USING-CLASS` was called;
+* **Class `CLASS-WITH-VALUE-SEMANTICS`** - a metaclass which automatically adds
+  `EQV-USING-CLASS` methods specialized on the class being defined;
+  * **Class `OBJECT-WITH-VALUE-SEMANTICS`** - an automatic subclass of all instances
+    of every `CLASS-WITH-VALUE-SEMANTICS`;
+* **Class `ALWAYS-BOUND-CLASS`** - a metaclass whose instances cannot have their
   slots unbound at any time;
-  * **`always-bound-object`**, an automatic subclass of all instances
-    of every `always-bound-class`;
-* **`typechecked-class`**, an `always-bound-class` with mandatory runtime
+  * **Class `ALWAYS-BOUND-OBJECT`** - an automatic subclass of all instances
+    of every `ALWAYS-BOUND-CLASS`;
+* **Class `TYPECHECKED-CLASS`** - an `ALWAYS-BOUND-CLASS` with mandatory runtime
   typechecking for slot values;
-  * **`typechecked-object`**, an automatic subclass of all instances
-    of every `typechecked-class`;
-* **`typechecked-class-with-value-semantics`**, a composition of the above three
-  metaclasses.
+  * **Class `TYPECHECKED-OBJECT`** - an automatic subclass of all instances
+    of every `TYPECHECKED-CLASS`;
+* **Class `TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS`** - a composition of the above
+  three metaclasses.
 
 ## TODO
 
