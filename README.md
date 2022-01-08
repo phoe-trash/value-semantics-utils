@@ -14,6 +14,7 @@ For such a programming style, the following assumptions should hold true:
   * It should be possible to use imperative logic wherever doing so does not mutate existing data.
 * Data should be represented via primitive Common Lisp types and standard classes.
   * It should be possible to use cyclic references for programming convenience.
+* It should be possible to consider a type mismatch an abnormal situation while comparing for equivalence.
 * Value semantics should be used to compare data for ~~equality~~equivalence. In particular, two classes should be equivalent if their types and contents are equivalent.
   * The only exception to using pure value semantics should be cycle detection in data structures, for which there seems to be no solution better than identity comparison.
     * (Thankfully, there are no generators or infinite lists in Lisp.)
@@ -25,6 +26,8 @@ This repository contains a series of utilities meant to facilitate this style of
 
 ## Manual
 
+Take a look at [the tests](t/) for more examples and edge cases.
+
 ### Equivalence
 
 #### **Function `EQV`**
@@ -33,7 +36,7 @@ This repository contains a series of utilities meant to facilitate this style of
 (eqv x y) → boolean
 ```
 
-An equivalence predicate that acts mostly like `EQUAL`. It is extensible and can be configured to not hang on cycles and to signal or not signal in case of fallthrough to the default method.
+An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is user-extensible via `EQV-USING-CLASS`, can be configured to not hang on cycles, and to possibly signal a `EQV-DEFAULT-METHOD-CALLED` condition in case of fallthrough to the default method.
 
 #### **Generic Function `EQV-USING-CLASS`**
 
@@ -57,13 +60,20 @@ Methods:
   * `(HASH-TABLE HASH-TABLE)` - compares hash table counts via `=`, then compares hash table test via `EQ`, then compares keys and values recursively via `EQV-USING-CLASS`;
   * `(T T)` - maybe signals a `EQV-DEFAULT-METHOD-CALLED`, then returns `NIL`.
 
+The methods for conses, arrays and hash-tables are defined similarly to `EQUALP`, except they use `EQV-USING-CLASS` for recursively comparing elements.
+
 #### **Variable `*EQV-RESOLVE-CYCLES-P*`** 
 
-A dynamic variable controlling whether `EQV` will check object identity to detect cycles. Defaults to true.
+A dynamic variable controlling whether `EQV` will check object identity to detect cycles. Defaults to true. Rebind it to false for saving some memory if you are **sure** that your data contains no cycles.
 
-#### **Variable `*EQV-DEFAULT-METHOD-BEHAVIOR*`**
+```lisp
+VALUE-SEMANTICS-UTILS> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#))
+T
 
-A dynamic variable controlling the signaling behavior of the default method on `EQV-USING-CLASS`. Allowed values are `NIL`, `SIGNAL`, `WARN`, and `ERROR` or any function which mimics the function signature of `SIGNAL`. Defaults to the symbol `WARN`.
+VALUE-SEMANTICS-UTILS> (let ((*eqv-resolve-cycles-p* nil))
+                         (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#)))
+;; the stack goes boom
+```
 
 #### **Condition Type `EQV-DEFAULT-METHOD-CALLED`**
 
@@ -72,6 +82,34 @@ A condition optionally signaled (see `*EQV-DEFAULT-METHOD-BEHAVIOR*`) when the d
 #### **Reader Function `EQV-DEFAULT-METHOD-CALLED-ARGS`**
 
 A reader function for the arguments with which the default method on `EQV-USING-CLASS` was called.
+
+#### **Variable `*EQV-DEFAULT-METHOD-BEHAVIOR*`**
+
+A dynamic variable controlling the signaling behavior of the default method on `EQV-USING-CLASS`. Allowed values are `NIL`, `SIGNAL`, `WARN`, and `ERROR` or any function which mimics the function signature of `SIGNAL`. Defaults to the symbol `WARN`.
+
+```lisp
+VALUE-SEMANTICS-UTILS> (let ((*eqv-default-method-behavior* nil))
+                         (eqv 42 "42"))
+NIL
+
+VALUE-SEMANTICS-UTILS> (let ((*eqv-default-method-behavior* 'signal))
+                         (flet ((note (c) (format t ";; ~A" c)))
+                           (handler-bind ((eqv-default-method-called #'note))
+                             (eqv 42 "42"))))
+;; EQV default method called with (42 "42"); possible type error?
+NIL
+
+VALUE-SEMANTICS-UTILS> (let ((*eqv-default-method-behavior* 'warn)) ; the default
+                         (eqv 42 "42"))
+;;; WARNING: EQV default method called with (42 "42"); possible type error?
+NIL
+
+VALUE-SEMANTICS-UTILS> (let ((*eqv-default-method-behavior* 'error))
+                         (eqv 42 "42"))
+;;; Error: EQV default method called with (42 "42"); possible type error?
+;;;   [Condition of type EQV-DEFAULT-METHOD-CALLED]
+
+```
 
 ### Value semantics
 
@@ -86,15 +124,87 @@ An automatic subclass of all instances of every `CLASS-WITH-VALUE-SEMANTICS`.
 Methods on `EQV-USING-CLASS`:
   * `(OBJECT-WITH-VALUE-SEMANTICS OBJECT-WITH-VALUE-SEMANTICS)` - compares the objects' classes via `EQ`, then recursively compares slot values via `EQV-USING-CLASS`.
 
+```lisp
+VALUE-SEMANTICS-UTILS> (defclass foo () 
+                         ((slot :initarg :slot))
+                         (:metaclass class-with-value-semantics))
+#<CLASS-WITH-VALUE-SEMANTICS VALUE-SEMANTICS-UTILS::FOO>
+
+VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo)
+                            (make-instance 'foo))
+T
+
+VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot 42)
+                            (make-instance 'foo :slot 42))
+T
+
+VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot 42)
+                            (make-instance 'foo))
+NIL
+
+VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot 42)
+                            (make-instance 'foo :slot "42"))
+;;; WARNING: EQV default method called with (42 "42"); possible type error?
+NIL
+
+VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot (make-instance 'foo))
+                            (make-instance 'foo :slot (make-instance 'foo)))
+T
+
+VALUE-SEMANTICS-UTILS> (defclass bar () 
+                         ((slot :initarg :slot))
+                         (:metaclass class-with-value-semantics))
+#<CLASS-WITH-VALUE-SEMANTICS VALUE-SEMANTICS-UTILS::BAR>
+
+VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot 42)
+                            (make-instance 'bar :slot 42))
+NIL
+```
+
 ### Always-bound
 
 #### **Class `ALWAYS-BOUND-CLASS`**
 
-A metaclass whose instances are meant to never have their slots unbound whatsoever.
+A metaclass whose instances are meant to never have their slots unbound.
 
 #### **Class `ALWAYS-BOUND-OBJECT`**
 
 An automatic subclass of all instances of every `ALWAYS-BOUND-CLASS`.
+
+```lisp
+VALUE-SEMANTICS-UTILS> (defclass baz () 
+                         ((slot :initarg :slot))
+                         (:metaclass always-bound-class))
+#<ALWAYS-BOUND-CLASS VALUE-SEMANTICS-UTILS::BAZ>
+
+VALUE-SEMANTICS-UTILS> (make-instance 'baz)
+;;; Error: The slot VALUE-SEMANTICS-UTILS::SLOT is unbound in the object #<BAZ {10026C0E93}>.
+;;;    [Condition of type UNBOUND-SLOT]
+
+VALUE-SEMANTICS-UTILS> (make-instance 'baz :slot 42)
+#<BAZ {100290BE73}>
+
+VALUE-SEMANTICS-UTILS> (slot-makunbound * 'slot)
+;;; Error: The slot VALUE-SEMANTICS-UTILS::SLOT is unbound in the object #<BAZ {100290BE73}>.
+;;;   [Condition of type UNBOUND-SLOT]
+;;;
+;;; Aborting to toplevel.
+
+VALUE-SEMANTICS-UTILS> (slot-value * 'slot)
+42
+```
+
+For an always-bound object, the following should hold true:
+
+* Attempting to initialize an instance with an unbound slot should signal an `unbound-slot` error.
+* Reinitializing an instance should, by definition, never introduce unbound slots in a class, but *just to be absolutely sure*, attempting to reinitialize an instance with an unbound slot should signal an `unbound-slot` error.
+* Redefining an always-bound class in a way that would cause an instance to gain an unbound slot should cause *any* accesses to that instance to repeatedly signal an `unbound-slot` error until the class is redefined in a way which no longer results in the instance gaining an unbound slot.
+* Attempting to change the class of an instance to an always-bound class in a way that would cause an instance to gain an unbound slot should signal an `unbound-slot` error.
+* Calling `slot-makunbound` on an instance should - guess what - signal an `unbound-slot` error.
+
+All errors signaled from the above situations should be correctable via both `use-value` and `store-value` restarts available; both of these restarts should work the same, as the provided value will be stored in the slot, after which execution will continue.
+
+TODO: change this to only offer a `store-value` restart.
 
 ### Typechecking
 
@@ -106,29 +216,36 @@ A metaclass with mandatory runtime typechecking for slot values. Subclasses `ALW
 
 An automatic subclass of all instances of every `TYPECHECKED-CLASS`.
 
+For a typechecked object, the following should hold true:
+
+* Attempting to initialize an instance with a mistyped slot should signal a `type-error` error.
+* Attempting to reinitialize an instance with a mistyped slot should signal a `type-error` error.
+* Redefining an typeched class in a way that would cause an instance to gain a mistyped slot should cause *any* accesses to that instance to repeatedly signal an`type-error` error until the class is redefined in a way which no longer results in the instance gaining a mistyped slot.
+* Attempting to change the class of an instance to a typechecked class in a way that would cause an instance to gain a mistyped slot should signal a `type-error` error.
+* Calling `setf slot-value` on an instance with a mistyped new value should - guess what - signal a `type-error` error.
+
+All errors signaled from the above situations should be correctable via both `use-value` and `store-value` restarts available; both of these restarts should work the same, as the provided value will be stored in the slot, after which execution will continue.
+
+TODO: change this to only offer a `store-value` restart.
+
 ### The final form™
 
 #### **Class `TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS`**
 
 A metaclass composing the above three metaclasses.
 
-## Examples
-
-To be done. Take a look at [the tests](t/) for the time being.
-
-## TODO
-
-* Examples
-* Wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed and
-  unskip a test that depends on it
-
 ## License
 
 MIT.
 
-## Fixups
+## Tested on
 
-Until SBCL catches up, evaluate the following in order to get the tests to pass.
+SBCL 2.1.11 with some custom fixups. Nowhere else, yet. Expect breakage because of high doses of MOP wizardry, even though this library uses `closer-mop`.
+
+On SBCL, we need to wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed and for the [patch](https://sourceforge.net/p/sbcl/mailman/sbcl-devel/thread/6ae094ba-eeea-6bfe-b43d-970d97040830%40disroot.org/) that stabilizes behavior for failed `U-I-F-{R,D}-C` to get merged. Sigh. MOP is hard. MOP interactions with everything else are even harder.
+
+If you don't want to wait for SBCL to catch up, evaluate the following in order to get the tests to pass.
+
 Trust me, I'm an engineer.
 
 ```lisp
