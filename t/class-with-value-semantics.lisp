@@ -5,16 +5,19 @@
    (slot-2 :initarg :slot-2))
   (:metaclass vs:class-with-value-semantics))
 
-(defparameter *validate-superclass-thunk*
+(define-test class-with-value-semantics :parent value-semantics-utils)
+
+(defparameter *class-with-value-semantics-thunk*
   `(lambda ()
      (defclass other-test-class (test-class-with-value-semantics) ()
        (:metaclass standard-class))))
 
-(define-test validate-superclass-failure :parent value-semantics-utils
-  (let ((thunk (compile nil *validate-superclass-thunk*)))
+(define-test class-with-value-semantics-validate-superclass-failure
+  :parent class-with-value-semantics
+  (let ((thunk (compile nil *class-with-value-semantics-thunk*)))
     (fail (funcall thunk))))
 
-(define-test class-with-value-semantics-true :parent value-semantics-utils
+(define-test class-with-value-semantics-true :parent class-with-value-semantics
   (flet ((make (&rest args)
            (apply #'make-instance 'test-class-with-value-semantics args)))
     (let ((x (make))
@@ -35,7 +38,7 @@
             (slot-value y 'slot-1) x)
       (is vs:eqv x y))))
 
-(define-test class-with-value-semantics-false :parent value-semantics-utils
+(define-test class-with-value-semantics-false :parent class-with-value-semantics
   (flet ((make (&rest args)
            (apply #'make-instance 'test-class-with-value-semantics args)))
     (let ((x (make :slot-1 1))
@@ -61,3 +64,16 @@
       (setf (slot-value x 'slot-1) x
             (slot-value y 'slot-1) x)
       (isnt vs:eqv x y))))
+
+(defclass other-test-class-with-value-semantics ()
+  ((slot-1 :initarg :slot-1)
+   (slot-2 :initarg :slot-2))
+  (:metaclass vs:class-with-value-semantics))
+
+(define-test class-with-value-semantics-different-classes
+  :parent class-with-value-semantics
+  (let ((instance-1 (make-instance 'test-class-with-value-semantics
+                                   :slot-1 42 :slot-2 24))
+        (instance-2 (make-instance 'other-test-class-with-value-semantics
+                                   :slot-1 42 :slot-2 24)))
+    (isnt vs:eqv instance-1 instance-2)))

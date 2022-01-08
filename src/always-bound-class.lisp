@@ -3,10 +3,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; ALWAYS-BOUND
 
-(defclass always-bound (standard-object) ())
+(defclass always-bound-object (standard-object) ())
 
 (defmethod shared-initialize :after
-    ((object always-bound) slot-names &rest initargs)
+    ((object always-bound-object) slot-names &rest initargs)
   (declare (ignore initargs))
   (let ((class (class-of object)))
     (dolist (slotd (class-slots (class-of object)))
@@ -29,7 +29,7 @@
          class slot-names
          :direct-superclasses
          (append (remove (find-class 'standard-object) direct-superclasses)
-                 (list (find-class 'always-bound)))
+                 (list (find-class 'always-bound-object)))
          rest))
 
 (defmethod slot-makunbound-using-class :around

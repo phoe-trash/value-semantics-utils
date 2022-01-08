@@ -10,8 +10,10 @@
    #:eqv-default-method-called-x
    #:eqv-default-method-called-y
    ;; CLASS-WITH-VALUE-SEMANTICS
+   #:object-with-value-semantics
    #:class-with-value-semantics
    ;; ALWAYS-BOUND-CLASS
+   #:always-bound-object
    #:always-bound-class
    ;; TYPECHECKED-CLASS
    #:typechecked-class
