@@ -89,14 +89,6 @@ VALUE-SEMANTICS-UTILS> (eqv '#1=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 . #1#) '#2=(1 . #2#
 T
 ```
 
-**Limitation**: currently, the amount of stack frames allocated this way scales linearly with the LCM (least common multiple) of the lengths of the cyclic sequences. This can cause stack overflows when comparing cycles with large LCMs.
-
-```lisp
-VALUE-SEMANTICS-UTILS> (eqv (alexandria:make-circular-list 100 :initial-element 1)
-                            (alexandria:make-circular-list 99 :initial-element 1))
-;;; the stack goes boom
-```
-
 #### **Condition Type `EQV-DEFAULT-METHOD-CALLED`**
 
 A condition optionally signaled (see `*EQV-DEFAULT-METHOD-BEHAVIOR*`) when the default method on `EQV-USING-CLASS` is called.
