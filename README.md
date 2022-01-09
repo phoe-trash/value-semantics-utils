@@ -271,7 +271,7 @@ A metaclass composing the above three metaclasses.
 
 `EQV` uses the generic function `EQV-USING-CLASS` in a continuation-passing sty-- Oh who am I kidding, I have no idea how to nicely explain how to extend `EQV-USING-CLASS` with the current CPSesque architecture. Let me explain it in a non-nice way.
 
-`EQV-USING-CLASS` accepts four arguments - the first two are the elements to be compared, and the first two are functions that are meant to be called. The value returned from `EQV-USING-CLASS` is ignored; a comparison failure must be performed via funcalling the `FAIL-FN` argument.
+`EQV-USING-CLASS` accepts four arguments - the first two are the elements to be compared, and the other two are functions that are meant to be called. The value returned from `EQV-USING-CLASS` is ignored; a comparison failure must be performed via funcalling the `FAIL-FN` argument. (Why, phoe? Fix this. TODO)
 
 When it comes to comparing primitive types such as strings or symbols, it is enough to funcall the `FAIL-FN` if the two objects are not equivalent. For recursive data structures, though, the protocol is slightly more involved.
 
