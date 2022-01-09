@@ -6,25 +6,33 @@
 (defclass object-with-value-semantics (standard-object) ())
 
 (defmethod eqv-using-class ((x object-with-value-semantics)
-                            (y object-with-value-semantics))
+                            (y object-with-value-semantics)
+                            compare-fn fail-fn)
+  (declare (type function compare-fn fail-fn))
   (declare (optimize speed))
-  (flet ((fail () (return-from eqv-using-class nil)))
-    (let ((x-class (class-of x))
-          (y-class (class-of y)))
-      (unless (eq x-class y-class) (fail))
-      (let* ((slots (u:slot-names x-class)))
-        (dolist (slot slots t)
-          (let ((boundp-x (slot-boundp x slot))
-                (boundp-y (slot-boundp y slot)))
-            (cond
-              ;; Both slots bound with EQV values.
-              ((and boundp-x boundp-y
-                    (eqv-using-class (slot-value x slot)
-                                     (slot-value y slot))))
-              ;; Both slots unbound.
-              ((and (not boundp-x) (not boundp-y)))
-              ;; All other cases are not EQV.
-              (t (fail)))))))))
+  (let ((x-class (class-of x))
+        (y-class (class-of y)))
+    (unless (eq x-class y-class) (funcall fail-fn))
+    (let* ((slots (u:slot-names x-class)))
+      (labels ((continuation ()
+                 (let* ((slot (car slots))
+                        (boundp-x (slot-boundp x slot))
+                        (boundp-y (slot-boundp y slot)))
+                   (setf slots (cdr slots))
+                   (cond
+                     ;; Both slots bound.
+                     ((and boundp-x boundp-y)
+                      (funcall compare-fn
+                               (slot-value x slot)
+                               (slot-value y slot)
+                               (when slots #'continuation)))
+                     ;; Both slots unbound.
+                     ((and (not boundp-x) (not boundp-y))
+                      (funcall compare-fn nil nil
+                               (when slots #'continuation)))
+                     ;; All other cases: fail.
+                     (t (funcall fail-fn))))))
+        (continuation)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CLASS-WITH-VALUE-SEMANTICS

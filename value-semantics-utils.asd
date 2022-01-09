@@ -6,7 +6,10 @@
   :license  "MIT"
   :version "0.0.1"
   :serial t
-  :depends-on (#:alexandria #:closer-mop #:moptilities)
+  :depends-on (#:alexandria
+               #:closer-mop
+               #:moptilities
+               #:with-macroexpand-time-branching)
   :pathname "src"
   :components ((:file "package")
                (:file "eqv")
@@ -15,7 +18,7 @@
                (:file "typechecked-class")
                (:file "typechecked-class-with-value-semantics")
                (:file "documentation"))
-  :in-order-to ((test-op (load-op :value-semantics-utils/test)))
+  :in-order-to ((test-op (load-op #:value-semantics-utils/test)))
   :perform
   (test-op (o c)
            (symbol-call

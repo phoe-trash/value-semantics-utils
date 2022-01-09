@@ -1,7 +1,8 @@
 (uiop:define-package #:value-semantics-utils
   (:use #:c2cl)
   (:local-nicknames (#:a #:alexandria)
-                    (#:u #:moptilities))
+                    (#:u #:moptilities)
+                    (#:w #:with-macroexpand-time-branching))
   (:export
    ;; EQV
    #:eqv

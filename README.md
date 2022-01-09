@@ -42,26 +42,26 @@ An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is user-ex
 #### **Generic Function `EQV-USING-CLASS`**
 
 ```lisp
-(eqv-using-class x y) → boolean
+(eqv-using-class x y compare-fn fail-rn) → boolean
 ```
 
-A means of programming `EQV`. Not meant to be called directly; programmers can write methods for it though.
+A means of programming `EQV`. Not meant to be called directly; programmers can write methods for it though - see "Extending".
 
-Methods:
-  * `:AROUND (T T)` - is used to resolve cycles by memoizing object identity (via `EQ`) across a single `EQV` call;
-  * `(FUNCTION FUNCTION)` - compares via `EQ`;
-  * `(SYMBOL SYMBOL)` - compares via `EQ`;
-  * `(PACKAGE PACKAGE)` - compares via `EQ`;
-  * `(STREAM STREAM)` - compares via `EQ`;
-  * `(NUMBER NUMBER)` - compares via `=`;
-  * `(STRING STRING)` - compares via `STRING=`;
-  * `(PATHNAME PATHNAME)` - compares via `EQUAL`;
-  * `(CONS CONS)` - compares the `CAR` and `CDR` recursively via `EQV-USING-CLASS`;
-  * `(ARRAY ARRAY)` - compares array dimensions via `EQUAL`, then compares elements recursively via `EQV-USING-CLASS`;
-  * `(HASH-TABLE HASH-TABLE)` - compares hash table counts via `=`, then compares hash table test via `EQ`, then compares keys and values recursively via `EQV-USING-CLASS`;
-  * `(T T)` - maybe signals a `EQV-DEFAULT-METHOD-CALLED`, then returns `NIL`.
+Methods are defined for `X` and `Y` of the following arguments:
+* `FUNCTION` - compares via `EQ`;
+* `SYMBOL` - compares via `EQ`;
+* `PACKAGE` - compares via `EQ`;
+* `STREAM` - compares via `EQ`;
+* `NUMBER` - compares via `=`;
+* `STRING` - compares via `STRING=`;
+* `PATHNAME` - compares via `EQUAL`;
+* `CONS` - compares the `CAR` and `CDR` recursively via `EQV-USING-CLASS`;
+* `ARRAY` - compares array dimensions via `EQUAL`, then compares elements recursively via `EQV-USING-CLASS`;
+* `HASH-TABLE` - compares hash table counts via `=`, then compares hash table test via `EQ`, then compares keys and values recursively via `EQV-USING-CLASS`;
+* `OBJECT-WITH-VALUE-SEMANTICS` (see below) - compares the objects' classes via `EQ`, then recursively compares slot values via `EQV-USING-CLASS`;
+* `T` - maybe signals a `EQV-DEFAULT-METHOD-CALLED`, then fails the comparison.
 
-The methods for conses, arrays and hash-tables are defined similarly to `EQUALP`, except they use `EQV-USING-CLASS` for recursively comparing elements.
+For conses, arrays and hash-tables, `EQV` are defined to work similarly to `EQUALP`, except it uses `EQV-USING-CLASS` for recursively comparing elements.
 
 #### **Variable `*EQV-RESOLVE-CYCLES-P*`** 
 
@@ -142,9 +142,6 @@ A metaclass whose metainstances are automatically comparable slotwise via `EQV`.
 #### **Class `OBJECT-WITH-VALUE-SEMANTICS`**
 
 An automatic subclass of all instances of every `CLASS-WITH-VALUE-SEMANTICS`.
-
-Methods on `EQV-USING-CLASS`:
-  * `(OBJECT-WITH-VALUE-SEMANTICS OBJECT-WITH-VALUE-SEMANTICS)` - compares the objects' classes via `EQ`, then recursively compares slot values via `EQV-USING-CLASS`.
 
 ```lisp
 VALUE-SEMANTICS-UTILS> (defclass foo () 
@@ -277,6 +274,18 @@ TODO: change this to only offer a `store-value` restart.
 #### **Class `TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS`**
 
 A metaclass composing the above three metaclasses.
+
+## Extending
+
+`EQV` uses the generic function `EQV-USING-CLASS` in a continuation-passing sty-- Oh who am I kidding, I have no idea how to nicely explain how to extend `EQV-USING-CLASS` with the current CPSesque architecture. Let me explain it in a non-nice way.
+
+`EQV-USING-CLASS` accepts four arguments - the first two are the elements to be compared, and the first two are functions that are meant to be called. The value returned from `EQV-USING-CLASS` is ignored; a comparison failure must be performed via funcalling the `FAIL-FN` argument.
+
+When it comes to comparing primitive types such as strings or symbols, it is enough to funcall the `FAIL-FN` if the two objects are not equivalent. For recursive data structures, though, the protocol is slightly more involved.
+
+If a comparison requires making any recursive comparisons, `EQV` expects that `COMPARE-FN` will be called in `EQV-USING-CLASS`. The two mandatory arguments to that function must be values to be compared the next time. If there is more than one recursive comparison required, the third (optional) argument to that function should be a zero-arg continuation function that will call `COMPARE-FN` again for the next pair of values. Take a look at the implementations for conses, arrays, and hash-tables to get a feel for how you should proceed.
+
+As long as this repository is in `phoe-trash`, this protocol might change. And let's hope it does - the current one absolutely sucks.
 
 ## License
 
