@@ -65,7 +65,7 @@ The methods for conses, arrays and hash-tables are defined similarly to `EQUALP`
 
 #### **Variable `*EQV-RESOLVE-CYCLES-P*`** 
 
-A dynamic variable controlling whether `EQV` will check object identity to detect cycles. Defaults to true. Rebind it to false for saving some memory if you are **sure** that your data contains no cycles.
+A dynamic variable controlling whether `EQV` will check object identity (via `EQ`) to detect cycles. Defaults to true. Rebind it to false for saving some memory if you are **sure** that the data you are comparing contains no cycles.
 
 ```lisp
 VALUE-SEMANTICS-UTILS> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#))
@@ -73,7 +73,28 @@ T
 
 VALUE-SEMANTICS-UTILS> (let ((*eqv-resolve-cycles-p* nil))
                          (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#)))
-;; the stack goes boom
+;;; the stack goes boom
+```
+
+Note that cycle detection is capable of detecting cycles which are equivalent value-wise, but whose underlying storage has different length.
+
+```lisp
+VALUE-SEMANTICS-UTILS> (eqv '#1=(1 2 3 1 2 3 . #1#) '#2=(1 2 3 . #2#))
+T
+
+VALUE-SEMANTICS-UTILS> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 1 2 3 . #2#))
+T
+
+VALUE-SEMANTICS-UTILS> (eqv '#1=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 . #1#) '#2=(1 . #2#))
+T
+```
+
+**Limitation**: currently, the amount of stack frames allocated this way scales linearly with the LCM (least common multiple) of the lengths of the cyclic sequences. This can cause stack overflows when comparing cycles with large LCMs.
+
+```lisp
+VALUE-SEMANTICS-UTILS> (eqv (alexandria:make-circular-list 100 :initial-element 1)
+                            (alexandria:make-circular-list 99 :initial-element 1))
+;;; the stack goes boom
 ```
 
 #### **Condition Type `EQV-DEFAULT-METHOD-CALLED`**

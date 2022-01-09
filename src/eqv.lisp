@@ -21,8 +21,8 @@
   (if *eqv-resolve-cycles-p*
       (or (eq x y)
           (multiple-value-bind (value foundp) (gethash x *eqv-state*)
-            (cond (foundp (eql value y))
-                  (t (setf (gethash x *eqv-state*) y)
+            (cond ((and foundp (member y value)) t)
+                  (t (push y (gethash x *eqv-state*))
                      (call-next-method)))))
       (call-next-method)))
 

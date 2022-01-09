@@ -42,7 +42,16 @@
           (list* 1 2 (cycle 3 3)))
       (is vs:eqv
           (list* 1 2 (cycle 3 (cycle 30 3)))
-          (list* 1 2 (cycle 3 (cycle 30 3)))))
+          (list* 1 2 (cycle 3 (cycle 30 3))))
+      (is vs:eqv
+          (list* 1 2 (cycle 3 3))
+          (list* 1 2 (cycle 4 3)))
+      (is vs:eqv
+          (list* 1 2 (cycle 3 (cycle 30 3)))
+          (list* 1 2 (cycle 3 (cycle 40 3)))))
+    (is vs:eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#))
+    (is vs:eqv '#3=(1 2 3 1 2 3 . #3#) '#4=(1 2 3 . #4#))
+    (is vs:eqv '#5=(1 2 3 . #5#) '#6=(1 2 3 1 2 3 . #6#))
     (is vs:eqv #(1 2 3 4 5) #(1 2 3 4 5))
     (is vs:eqv #2A((1 2 3) (4 5 6)) #2A((1 2 3) (4 5 6)))
     (is vs:eqv
@@ -79,14 +88,8 @@
             (list* 1 2 (cycle 3 4))
             (list* 1 2 (cycle 3 3)))
       (isnt vs:eqv
-            (list* 1 2 (cycle 3 3))
-            (list* 1 2 (cycle 4 3)))
-      (isnt vs:eqv
             (list* 1 2 (cycle 3 (cycle 30 3)))
-            (list* 1 2 (cycle 3 (cycle 30 4))))
-      (isnt vs:eqv
-            (list* 1 2 (cycle 3 (cycle 30 3)))
-            (list* 1 2 (cycle 3 (cycle 40 3)))))
+            (list* 1 2 (cycle 3 (cycle 30 4)))))
     (isnt vs:eqv #(1 2 3 4 5) #(1 2 3 4 5 6))
     (isnt vs:eqv #(1 2 3 4 5) #(1 2 3 0 5))
     (isnt vs:eqv #2A((1 2 3) (4 5 6)) #(1 2 3 4 5 6))
