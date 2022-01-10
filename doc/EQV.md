@@ -18,15 +18,32 @@ An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is:
 
 The main entry point to the equivalence comparator.
 
-The keyword argument `detect-cycles-p` drives the cycle detection engine.
-* Turn it on to be able to avoid hanging on cyclic references.
-* Turn it off for a major speedup and a decrease in memory usage and GC pressure.
+The keyword argument `detect-cycles-p` drives the cycle detection engine. Set it to:
+* true, to be able to not hang on cyclic references,
+* false, for a major speedup and a decrease in memory usage and GC pressure.
+
+With cycle detection:
 
 ```lisp
 CL-USER> (let ((x '#1=(1 2 3 . #1#)) (y '#2=(1 2 3 1 2 3 . #2#)))
            (vs:eqv x y))
 T
 
+CL-USER> (let ((x (make-list 10000000)) (y (make-list 10000000)))
+           (time (vs:eqv x y)))
+Evaluation took:
+  9.283 seconds of real time
+  9.279015 seconds of total run time (8.345137 user, 0.933878 system)
+  [ Run times consist of 5.915 seconds GC time, and 3.365 seconds non-GC time. ]
+  99.96% CPU
+  32,488,353,856 processor cycles
+  6,354,358,496 bytes consed
+T
+```
+
+Without cycle detection:
+
+```lisp
 CL-USER> (let ((x '#1=(1 2 3 . #1#)) (y '#2=(1 2 3 1 2 3 . #2#)))
            (vs:eqv x y :detect-cycles-p nil))
 ;;; hangs forever
@@ -40,17 +57,6 @@ Evaluation took:
   100.10% CPU
   3,426,144,609 processor cycles
   959,987,792 bytes consed
-T
-
-CL-USER> (let ((x (make-list 10000000)) (y (make-list 10000000)))
-           (time (vs:eqv x y :detect-cycles-p t)))
-Evaluation took:
-  9.283 seconds of real time
-  9.279015 seconds of total run time (8.345137 user, 0.933878 system)
-  [ Run times consist of 5.915 seconds GC time, and 3.365 seconds non-GC time. ]
-  99.96% CPU
-  32,488,353,856 processor cycles
-  6,354,358,496 bytes consed
 T
 ```
 
