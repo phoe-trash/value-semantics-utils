@@ -73,7 +73,7 @@ T
 
 VALUE-SEMANTICS-UTILS> (let ((*eqv-resolve-cycles-p* nil))
                          (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#)))
-;;; the stack goes boom
+;;; loops until the heap goes boom
 ```
 
 Note that cycle detection is capable of detecting cycles which are equivalent value-wise, but whose underlying storage has different length.
