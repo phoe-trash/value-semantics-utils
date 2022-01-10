@@ -4,7 +4,7 @@
 
 ### **Class `CLASS-WITH-VALUE-SEMANTICS`**
 
-A metaclass whose metainstances are automatically comparable slotwise via `EQV`.
+A metaclass whose metainstances are automatically comparable slotwise via [`EQV`](EQV.md).
 
 ### **Class `OBJECT-WITH-VALUE-SEMANTICS`**
 
