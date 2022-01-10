@@ -60,12 +60,10 @@
         (a:alist-hash-table '((:a . 1) (:b . 2) (:c . 3))))))
 
 (define-test eqv-stack :parent eqv
-  (let ((m 1000)
-        (n 191))
+  (let ((m 2999)
+        (n 3001))
     ;; The below test checks that it is possible to detect pretty long cycles
-    ;; without blowing the stack. It may take a while - it needs to walk
-    ;; O(M * N^2) conses, given that I properly computed the complexity.
-    ;; M and N should be coprime for maximum stress.
+    ;; without blowing the stack. It may take a while.
     (is vs:eqv (cycle m) (cycle n))))
 
 (define-test eqv-cl-types-false :parent eqv

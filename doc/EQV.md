@@ -1,5 +1,12 @@
 # `EQV` - the programmable equivalence predicate
 
+An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is:
+
+* written to not overflow the stack,
+* user-extensible via `GENERIC-EQV`,
+* configurable to not hang on cycles,
+* configure to signal a `EQV-DEFAULT-METHOD-CALLED` condition (a subtype of `WARNING`) in case of fallthrough to the default method (e.g. for type mismatches).
+
 ## API
 
 ### **Function `EQV`**
@@ -8,7 +15,7 @@
 (eqv x y) → boolean
 ```
 
-An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is user-extensible via `GENERIC-EQV`, can be configured to not hang on cycles, and to possibly signal a `EQV-DEFAULT-METHOD-CALLED` condition in case of fallthrough to the default method.
+The main entry point.
 
 ### **Generic Function `GENERIC-EQV`**
 
@@ -16,9 +23,9 @@ An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is user-ex
 (generic-eqv x y) → boolean
 ```
 
-A means of programming `EQV`. Not meant to be called directly, programmers can write methods for it though (see "Extending").
+A means of programming `EQV`. Not meant to be called directly, programmers can write methods for it though (see [Extending](#extending)).
 
-Methods are defined for `X` and `Y` both being of the following class:
+Methods are defined for `X` and `Y` both specialized to the following classes:
 * `FUNCTION` - compares via `EQ`;
 * `SYMBOL` - compares interned symbols via `EQ` and uninterned symbols via `STRING=` of their names;
 * `PACKAGE` - compares via `EQ`;
@@ -32,31 +39,31 @@ Methods are defined for `X` and `Y` both being of the following class:
 * `OBJECT-WITH-VALUE-SEMANTICS` (see [the classes manual](CLASSES.md)) - compares the objects' classes via `EQ`, then recursively compares slot values via `GENERIC-EQV`;
 * `T` - maybe signals a `EQV-DEFAULT-METHOD-CALLED`, then fails the comparison.
 
-For conses, arrays and hash-tables, `EQV` are defined to work similarly to `EQUALP`, except it uses `GENERIC-EQV` for recursively comparing elements.
+For conses, arrays and hash-tables, `EQV` are defined to work similarly to `EQUALP`, except it uses `GENERIC-EQV` for recursively comparing the elements of these collections.
 
 ### **Variable `*EQV-RESOLVE-CYCLES-P*`** 
 
 A dynamic variable controlling whether `EQV` will check object identity (via `EQ`) to detect cycles. Defaults to true. Rebind it to false for saving some memory if you are **sure** that the data you are comparing contains no cycles.
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#))
+CL-USER> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#))
 T
 
-VALUE-SEMANTICS-UTILS> (let ((*eqv-resolve-cycles-p* nil))
-                         (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#)))
+CL-USER> (let ((*eqv-resolve-cycles-p* nil))
+           (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#)))
 ;;; loops until the heap goes boom
 ```
 
 Note that cycle detection is capable of detecting cycles which are equivalent value-wise, but whose underlying storage has different length.
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (eqv '#1=(1 2 3 1 2 3 . #1#) '#2=(1 2 3 . #2#))
+CL-USER> (eqv '#1=(1 2 3 1 2 3 . #1#) '#2=(1 2 3 . #2#))
 T
 
-VALUE-SEMANTICS-UTILS> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 1 2 3 . #2#))
+CL-USER> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 1 2 3 . #2#))
 T
 
-VALUE-SEMANTICS-UTILS> (eqv '#1=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 . #1#) '#2=(1 . #2#))
+CL-USER> (eqv '#1=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 . #1#) '#2=(1 . #2#))
 T
 ```
 
@@ -73,24 +80,24 @@ A reader function for the arguments with which the default method on `GENERIC-EQ
 A dynamic variable controlling the signaling behavior of the default method on `GENERIC-EQV`. Allowed values are `NIL`, `SIGNAL`, `WARN`, and `ERROR` or any function which mimics the function signature of `SIGNAL`. Defaults to the symbol `WARN`.
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (let ((*eqv-default-method-behavior* nil))
-                         (eqv 42 "42"))
+CL-USER> (let ((*eqv-default-method-behavior* nil))
+           (eqv 42 "42"))
 NIL
 
-VALUE-SEMANTICS-UTILS> (let ((*eqv-default-method-behavior* 'signal))
-                         (flet ((note (c) (format t ";; ~A" c)))
-                           (handler-bind ((eqv-default-method-called #'note))
-                             (eqv 42 "42"))))
+CL-USER> (let ((*eqv-default-method-behavior* 'signal))
+           (flet ((note (c) (format t ";; ~A" c)))
+             (handler-bind ((eqv-default-method-called #'note))
+               (eqv 42 "42"))))
 ;; EQV default method called with (42 "42"); possible type error?
 NIL
 
-VALUE-SEMANTICS-UTILS> (let ((*eqv-default-method-behavior* 'warn)) ; the default
-                         (eqv 42 "42"))
+CL-USER> (let ((*eqv-default-method-behavior* 'warn)) ; the default
+           (eqv 42 "42"))
 ;;; WARNING: EQV default method called with (42 "42"); possible type error?
 NIL
 
-VALUE-SEMANTICS-UTILS> (let ((*eqv-default-method-behavior* 'error))
-                         (eqv 42 "42"))
+CL-USER> (let ((*eqv-default-method-behavior* 'error))
+           (eqv 42 "42"))
 ;;; Error: EQV default method called with (42 "42"); possible type error?
 ;;;   [Condition of type EQV-DEFAULT-METHOD-CALLED]
 
@@ -107,7 +114,7 @@ Of course, if a particular method can ensure that it can compare its arguments w
 Let's consider a small example: let's manually check if `'(1 (2 3))` is equivalent to `'(1 (2 3))` using only `GENERIC-EQV`.
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (generic-eqv '(1 (2 3)) '(1 (2 3)))
+CL-USER> (generic-eqv '(1 (2 3)) '(1 (2 3)))
 T
 1
 1
@@ -117,25 +124,25 @@ T
 In this call, we get four values: the first value is true, and that means that we should continue comparing. The second and third values are values to be recursively compared via `GENERIC-EQV`, in this case, the `CAR`s of the cons cells; it calls `=` for numbers, so we'll skip that. The fourth value is a continuation function that should be called in order to give us the next set of values, in this case, the `CDR`s of these cons cells.
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (funcall (fourth /))
+CL-USER> (funcall (fourth /))
 T
 ((2 3))
 ((2 3))
 NIL
 ```
 
-We see that the fourth return value is `NIL`, which means that the data structure has no more values that we should compare. That's understandable - a cons cell can only refer to two objects. We are free to compare the second and third value using `GENERIC-EQV`:
+We see that the fourth return value is `NIL`, which means that the data structure has no more values that we should compare. That's understandable - a cons cell can only refer to two objects. This means that the only thing left to do is to compare the second and third values using `GENERIC-EQV`:
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (generic-eqv (second /) (third /))
+CL-USER> (generic-eqv (second /) (third /))
 T
 (2 3)
 (2 3)
 #<FUNCTION (LABELS CDR-CONTINUATION :IN GENERIC-EQV) {100BF821EB}>
 ```
 
-And this goes on either until the first returned value is `NIL`, which immediately fails the comparison, or until the first value is true and the three remaining ones are `NIL`, which means that there is nothing left to compare.
+This process goes on either until the first returned value is `NIL`, which immediately fails the comparison, or until the first value is true and the three remaining ones are `NIL`, which means that there is nothing left to compare.
 
-`EQV` also correctly handles a situation in which it needs to defer calling a continuation for later in order to compare the returned values first for preserving traversal order. It's done by allocating a closure on the heap, in which the values are compared by `GENERIC-EQV` and in which the continuation object will eventually be returned for processing.
+`EQV` correctly handles a situation in which it needs to defer calling a continuation for later in order to compare the returned values first for preserving traversal order. It's done by allocating a closure on the heap, in which the values are compared by `GENERIC-EQV` and in which the continuation object will eventually be returned for processing. (In theory, traversal order should not matter for comparing two data structures, but we nonetheless decided to implement it here for implementation predictability.)
 
-Why are the second and third values returned if, in theory, all we need is a boolean value to figure out if we need to continue the comparison and a continuation object to continue comparing? The answer is that `EQV` is capable of performing cycle detection, for which it needs to access the objects themselves in order to check their identity for cycle detection.
+One question that might arise is: if, in theory, all we need is a boolean value to figure out if we need to continue the comparison and a continuation object to continue comparing, then why are the second and third values returned at all? The answer in this case is that `EQV` is capable of performing cycle detection, for which it needs to access the objects themselves in order to check their identity for cycle detection.

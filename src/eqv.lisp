@@ -173,9 +173,11 @@
            ;; If we're detecting cycles...
            (w:macroexpand-time-when detect-cycles-p
              ;; ...then, have we already been here?
-             (cond ((and x y (not (member y (gethash x state) :test #'eq)))
+             (cond ((and x y (not (gethash y (a:ensure-gethash
+                                              x state
+                                              (make-hash-table :test #'eq)))))
                     ;; We haven't - remember that pair of objects for later.
-                    (pushnew y (gethash x state) :test #'eq))
+                    (setf (gethash y (gethash x state)) t))
                    ;; OK, so we have already seen that pair of objects befote.
                    ;; Is there a new continuation?
                    (new-continuation

@@ -11,39 +11,39 @@ A metaclass whose metainstances are automatically comparable slotwise via `EQV`.
 An automatic subclass of all instances of every `CLASS-WITH-VALUE-SEMANTICS`.
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (defclass foo () 
-                         ((slot :initarg :slot))
-                         (:metaclass class-with-value-semantics))
-#<CLASS-WITH-VALUE-SEMANTICS VALUE-SEMANTICS-UTILS::FOO>
+CL-USER> (defclass foo ()
+           ((slot :initarg :slot))
+           (:metaclass class-with-value-semantics))
+#<CLASS-WITH-VALUE-SEMANTICS CL-USER::FOO>
 
-VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo)
-                            (make-instance 'foo))
+CL-USER> (eqv (make-instance 'foo)
+              (make-instance 'foo))
 T
 
-VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot 42)
-                            (make-instance 'foo :slot 42))
+CL-USER> (eqv (make-instance 'foo :slot 42)
+              (make-instance 'foo :slot 42))
 T
 
-VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot 42)
-                            (make-instance 'foo))
+CL-USER> (eqv (make-instance 'foo :slot 42)
+              (make-instance 'foo))
 NIL
 
-VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot 42)
-                            (make-instance 'foo :slot "42"))
+CL-USER> (eqv (make-instance 'foo :slot 42)
+              (make-instance 'foo :slot "42"))
 ;;; WARNING: EQV default method called with (42 "42"); possible type error?
 NIL
 
-VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot (make-instance 'foo))
-                            (make-instance 'foo :slot (make-instance 'foo)))
+CL-USER> (eqv (make-instance 'foo :slot (make-instance 'foo))
+              (make-instance 'foo :slot (make-instance 'foo)))
 T
 
-VALUE-SEMANTICS-UTILS> (defclass bar () 
-                         ((slot :initarg :slot))
-                         (:metaclass class-with-value-semantics))
-#<CLASS-WITH-VALUE-SEMANTICS VALUE-SEMANTICS-UTILS::BAR>
+CL-USER> (defclass bar ()
+           ((slot :initarg :slot))
+           (:metaclass class-with-value-semantics))
+#<CLASS-WITH-VALUE-SEMANTICS CL-USER::BAR>
 
-VALUE-SEMANTICS-UTILS> (eqv (make-instance 'foo :slot 42)
-                            (make-instance 'bar :slot 42))
+CL-USER> (eqv (make-instance 'foo :slot 42)
+              (make-instance 'bar :slot 42))
 NIL
 ```
 
@@ -58,25 +58,25 @@ A metaclass whose instances are meant to never have their slots unbound.
 An automatic subclass of all instances of every `ALWAYS-BOUND-CLASS`.
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (defclass baz () 
-                         ((slot :initarg :slot))
-                         (:metaclass always-bound-class))
-#<ALWAYS-BOUND-CLASS VALUE-SEMANTICS-UTILS::BAZ>
+CL-USER> (defclass baz ()
+           ((slot :initarg :slot))
+           (:metaclass always-bound-class))
+#<ALWAYS-BOUND-CLASS CL-USER::BAZ>
 
-VALUE-SEMANTICS-UTILS> (make-instance 'baz)
-;;; Error: The slot VALUE-SEMANTICS-UTILS::SLOT is unbound in the object #<BAZ {10026C0E93}>.
+CL-USER> (make-instance 'baz)
+;;; Error: The slot CL-USER::SLOT is unbound in the object #<BAZ {10026C0E93}>.
 ;;;    [Condition of type UNBOUND-SLOT]
 
-VALUE-SEMANTICS-UTILS> (make-instance 'baz :slot 42)
+CL-USER> (make-instance 'baz :slot 42)
 #<BAZ {100290BE73}>
 
-VALUE-SEMANTICS-UTILS> (slot-makunbound * 'slot)
-;;; Error: The slot VALUE-SEMANTICS-UTILS::SLOT is unbound in the object #<BAZ {100290BE73}>.
+CL-USER> (slot-makunbound * 'slot)
+;;; Error: The slot CL-USER::SLOT is unbound in the object #<BAZ {100290BE73}>.
 ;;;   [Condition of type UNBOUND-SLOT]
 ;;;
 ;;; Aborting to toplevel.
 
-VALUE-SEMANTICS-UTILS> (slot-value * 'slot)
+CL-USER> (slot-value * 'slot)
 42
 ```
 
@@ -103,23 +103,23 @@ A metaclass with mandatory runtime typechecking for slot values. Subclasses `ALW
 An automatic subclass of all instances of every `TYPECHECKED-CLASS`.
 
 ```lisp
-VALUE-SEMANTICS-UTILS> (defclass quux ()
-                         ((slot :initarg :slot :type integer))
-                         (:metaclass typechecked-class))
-#<TYPECHECKED-CLASS VALUE-SEMANTICS-UTILS::QUUX>
+CL-USER> (defclass quux ()
+           ((slot :initarg :slot :type integer))
+           (:metaclass typechecked-class))
+#<TYPECHECKED-CLASS CL-USER::QUUX>
 
-VALUE-SEMANTICS-UTILS> (make-instance 'quux)
-;;; Error: The slot VALUE-SEMANTICS-UTILS::SLOT is unbound in the object #<QUUX {1005907C23}>.
+CL-USER> (make-instance 'quux)
+;;; Error: The slot CL-USER::SLOT is unbound in the object #<QUUX {1005907C23}>.
 ;;;   [Condition of type UNBOUND-SLOT]
 
-VALUE-SEMANTICS-UTILS> (make-instance 'quux :slot "42")
+CL-USER> (make-instance 'quux :slot "42")
 ;;; Error: The value "42" is not of type INTEGER.
 ;;;   [Condition of type TYPE-ERROR]
 
-VALUE-SEMANTICS-UTILS> (make-instance 'quux :slot 42)
+CL-USER> (make-instance 'quux :slot 42)
 #<QUUX {1005C9A643}>
 
-VALUE-SEMANTICS-UTILS> (setf (slot-value * 'slot) "42")
+CL-USER> (setf (slot-value * 'slot) "42")
 ;;; Error: The value "42" is not of type INTEGER.
 ;;;   [Condition of type TYPE-ERROR]
 ```
