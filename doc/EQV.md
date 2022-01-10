@@ -4,7 +4,7 @@ An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is:
 
 * capable of working with standard Common Lisp data types by default,
 * user-extensible via `GENERIC-EQV`,
-* capable of detecting cycles by default,
+* configurable to detect cycles and recognize them as equivalent,
 * designed to never overflow the stack even on deeply nested structures or when working with long cycles,
 * configurable to signal a `EQV-DEFAULT-METHOD-CALLED` warning in case of fallthrough to the default method (e.g. for type mismatches).
 
@@ -13,10 +13,46 @@ An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is:
 ### **Function `EQV`**
 
 ```lisp
-(eqv x y) → boolean
+(eqv x y &key (detect-cycles-p t)) → boolean
 ```
 
-The main entry point.
+The main entry point to the equivalence comparator.
+
+The keyword argument `detect-cycles-p` drives the cycle detection engine.
+* Turn it on to be able to avoid hanging on cyclic references.
+* Turn it off for a major speedup and a decrease in memory usage and GC pressure.
+
+```lisp
+CL-USER> (let ((x '#1=(1 2 3 . #1#)) (y '#2=(1 2 3 1 2 3 . #2#)))
+           (vs:eqv x y))
+T
+
+CL-USER> (let ((x '#1=(1 2 3 . #1#)) (y '#2=(1 2 3 1 2 3 . #2#)))
+           (vs:eqv x y :detect-cycles-p nil))
+;;; hangs forever
+
+CL-USER> (let ((x (make-list 10000000)) (y (make-list 10000000)))
+           (time (vs:eqv x y :detect-cycles-p nil)))
+Evaluation took:
+  0.979 seconds of real time
+  0.980087 seconds of total run time (0.871840 user, 0.108247 system)
+  [ Run times consist of 0.682 seconds GC time, and 0.299 seconds non-GC time. ]
+  100.10% CPU
+  3,426,144,609 processor cycles
+  959,987,792 bytes consed
+T
+
+CL-USER> (let ((x (make-list 10000000)) (y (make-list 10000000)))
+           (time (vs:eqv x y :detect-cycles-p t)))
+Evaluation took:
+  9.283 seconds of real time
+  9.279015 seconds of total run time (8.345137 user, 0.933878 system)
+  [ Run times consist of 5.915 seconds GC time, and 3.365 seconds non-GC time. ]
+  99.96% CPU
+  32,488,353,856 processor cycles
+  6,354,358,496 bytes consed
+T
+```
 
 ### **Generic Function `GENERIC-EQV`**
 
