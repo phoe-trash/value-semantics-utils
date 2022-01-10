@@ -5,18 +5,18 @@
 
 (defclass object-with-value-semantics (standard-object) ())
 
-(defmethod eqv-using-class ((x object-with-value-semantics)
+(defmethod generic-eqv ((x object-with-value-semantics)
                             (y object-with-value-semantics))
   (declare (optimize speed))
   (let ((x-class (class-of x))
         (y-class (class-of y)))
     ;; If object classes are different, the comparison fails.
     (unless (eq x-class y-class)
-      (return-from eqv-using-class (values nil nil nil nil)))
+      (return-from generic-eqv (values nil nil nil nil)))
     (let* ((slots (u:slot-names x-class)))
       ;; If the instances have no slots, the comparison succeeds.
       (when (null slots)
-        (return-from eqv-using-class (values t nil nil nil)))
+        (return-from generic-eqv (values t nil nil nil)))
       ;; There are slots present in the instances. Return a continuation that
       ;; will compare them value-wise.
       (labels ((value-semantics-continuation ()

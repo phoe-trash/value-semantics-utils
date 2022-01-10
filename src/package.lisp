@@ -6,7 +6,7 @@
   (:export
    ;; EQV
    #:eqv
-   #:eqv-using-class
+   #:generic-eqv
    #:*eqv-resolve-cycles-p*
    #:*eqv-default-method-behavior*
    #:eqv-default-method-called

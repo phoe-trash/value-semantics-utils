@@ -3,7 +3,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; GFs
 
-(defgeneric eqv-using-class (x y))
+(defgeneric generic-eqv (x y))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Default method
@@ -12,13 +12,13 @@
   ((args :reader eqv-default-method-called-args :initarg :args))
   (:default-initargs :args (a:required-argument :args))
   (:report (lambda (condition stream)
-             (format stream "EQV-USING-CLASS: default method called ~
+             (format stream "GENERIC-EQV: default method called ~
                              with ~S; possible type error?"
                      (eqv-default-method-called-args condition)))))
 
 (defvar *eqv-default-method-behavior* 'warn)
 
-(defmethod eqv-using-class (x y)
+(defmethod generic-eqv (x y)
   (when *eqv-default-method-behavior*
     (funcall *eqv-default-method-behavior*
              'eqv-default-method-called
@@ -28,10 +28,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementations for standard Common Lisp types
 
-(defmethod eqv-using-class ((x function) (y function))
+(defmethod generic-eqv ((x function) (y function))
   (values (eq x y) nil nil nil))
 
-(defmethod eqv-using-class ((x symbol) (y symbol))
+(defmethod generic-eqv ((x symbol) (y symbol))
   (declare (optimize speed))
   (let ((result (or (eq x y)
                     (and (null (symbol-package x))
@@ -39,40 +39,40 @@
                          (string= (symbol-name x) (symbol-name y))))))
     (values result nil nil nil)))
 
-(defmethod eqv-using-class ((x package) (y package))
+(defmethod generic-eqv ((x package) (y package))
   (values (eq x y) nil nil nil))
 
-(defmethod eqv-using-class ((x stream) (y stream))
+(defmethod generic-eqv ((x stream) (y stream))
   (values (eq x y) nil nil nil))
 
-(defmethod eqv-using-class ((x number) (y number))
+(defmethod generic-eqv ((x number) (y number))
   (values (= x y) nil nil nil))
 
-(defmethod eqv-using-class ((x character) (y character))
+(defmethod generic-eqv ((x character) (y character))
   (values (char= x y) nil nil nil))
 
-(defmethod eqv-using-class ((x string) (y string))
+(defmethod generic-eqv ((x string) (y string))
   (values (string= x y) nil nil nil))
 
-(defmethod eqv-using-class ((x pathname) (y pathname))
+(defmethod generic-eqv ((x pathname) (y pathname))
   (values (equal x y) nil nil nil))
 
-(defmethod eqv-using-class ((x cons) (y cons))
+(defmethod generic-eqv ((x cons) (y cons))
   (declare (optimize speed))
   (labels ((cdr-continuation () (values t (cdr x) (cdr y) nil))
            (car-continuation () (values t (car x) (car y) #'cdr-continuation)))
     (car-continuation)))
 
-(defmethod eqv-using-class ((x array) (y array))
+(defmethod generic-eqv ((x array) (y array))
   (declare (optimize speed))
   (declare #+sbcl (sb-ext:muffle-conditions sb-ext:compiler-note))
   ;; If the dimensions are different, the comparison fails.
   (unless (equal (array-dimensions x) (array-dimensions y))
-    (return-from eqv-using-class (values nil nil nil)))
+    (return-from generic-eqv (values nil nil nil)))
   (let ((array-total-size (array-total-size x)))
     ;; If the arrays are empty, the comparison succeeds.
     (when (= 0 array-total-size)
-      (return-from eqv-using-class (values t nil nil nil)))
+      (return-from generic-eqv (values t nil nil nil)))
     ;; The arrays are not empty. Return a continuation that will compare them
     ;; element-wise.
     (let ((index 0))
@@ -87,16 +87,16 @@
                      (values t x-element y-element continuation)))))
         (array-continuation)))))
 
-(defmethod eqv-using-class ((x hash-table) (y hash-table))
+(defmethod generic-eqv ((x hash-table) (y hash-table))
   (declare (optimize speed))
   ;; If the hash-table metadata is different, the comparison fails.
   (unless (and (= (hash-table-count x) (hash-table-count y))
                (eq (hash-table-test x) (hash-table-test y)))
-    (return-from eqv-using-class (values nil nil nil nil)))
+    (return-from generic-eqv (values nil nil nil nil)))
   (let ((keys (alexandria:hash-table-keys x)))
     ;; If the hash-tables are empty, the comparison succeeds.
     (when (null keys)
-      (return-from eqv-using-class (values t nil nil nil)))
+      (return-from generic-eqv (values t nil nil nil)))
     ;; The hash-tables are not empty. Return a continuation that will compare
     ;; them key-and-value-wise.
     (labels ((hash-table-continuation ()
@@ -191,7 +191,7 @@
                   (setf continuation
                         ;; If both values and a new continuation were returned,
                         ;; queue the continuation and compare the values first.
-                        (merge-continuations (lambda () (eqv-using-class x y))
+                        (merge-continuations (lambda () (generic-eqv x y))
                                              new-continuation)))
                  (t
                   ;; No new values  - use the new continuation as-is.
@@ -200,4 +200,4 @@
            (go :start))))))
 
 (defun eqv (x y &key (detect-cycles-p t))
-  (%eqv (lambda () (eqv-using-class x y)) detect-cycles-p))
+  (%eqv (lambda () (generic-eqv x y)) detect-cycles-p))

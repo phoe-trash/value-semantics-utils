@@ -121,7 +121,7 @@
 
 (defvar *eqv-test-class-eqv*)
 
-(defmethod vs:eqv-using-class ((x eqv-test-class) (y eqv-test-class))
+(defmethod vs:generic-eqv ((x eqv-test-class) (y eqv-test-class))
   (if *eqv-test-class-eqv*
       (values t nil nil nil)
       (values nil nil nil nil)))
@@ -138,7 +138,7 @@
 
 (defvar *count*)
 
-(defmethod vs:eqv-using-class ((x eqv-cycle-test) (y eqv-cycle-test))
+(defmethod vs:generic-eqv ((x eqv-cycle-test) (y eqv-cycle-test))
   (labels ((continuation ()
              (incf *count*)
              (when (> *count* 100)

@@ -5,14 +5,14 @@
  (documentation 'eqv 'function)
  "A programmable equivalence predicate with cycle detection.
 
-See EQV-USING-CLASS"
- (documentation 'eqv-using-class 'function)
+See GENERIC-EQV"
+ (documentation 'generic-eqv 'function)
  "A generic function implementing comparison behavior for EQV.
 
 See EQV"
  (documentation '*eqv-default-method-behavior* 'variable)
  "A global dynamic variable which drives the behavior when the default
-method for EQV-USING-CLASS is called. If NIL, then NIL is returned; if any of
+method for GENERIC-EQV is called. If NIL, then NIL is returned; if any of
 SIGNAL, WARN, or ERROR, then the respective CL function is used to signal a
 condition of type EQV-DEFAULT-METHOD-CALLED.
 
@@ -36,12 +36,12 @@ See EQV-DEFAULT-METHOD-CALLED")
 (setf
  (documentation 'class-with-value-semantics 'type)
  "A metaclass for classes meant to be comparable via EQV. Whenever this class is
-instantiated, a new method on EQV-USING-CLASS is added, specialized on two
+instantiated, a new method on GENERIC-EQV is added, specialized on two
 instances of this class; the instances are compared slotwise via
-EQV-USING-CLASS.
+GENERIC-EQV.
 
 See EQV
-See EQV-USING-CLASS")
+See GENERIC-EQV")
 
 ;;; ALWAYS-BOUND-CLASS
 (setf
