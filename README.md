@@ -42,14 +42,14 @@ An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is user-ex
 #### **Generic Function `EQV-USING-CLASS`**
 
 ```lisp
-(eqv-using-class x y compare-fn fail-rn) → boolean
+(eqv-using-class x y) → boolean
 ```
 
-A means of programming `EQV`. Not meant to be called directly; programmers can write methods for it though - see "Extending".
+A means of programming `EQV`. Not meant to be called directly, programmers can write methods for it though (see "Extending").
 
-Methods are defined for `X` and `Y` of the following arguments:
+Methods are defined for `X` and `Y` both being of the following class:
 * `FUNCTION` - compares via `EQ`;
-* `SYMBOL` - compares via `EQ`;
+* `SYMBOL` - compares interned symbols via `EQ` and uninterned symbols via `STRING=` of their names;
 * `PACKAGE` - compares via `EQ`;
 * `STREAM` - compares via `EQ`;
 * `NUMBER` - compares via `=`;
@@ -269,15 +269,47 @@ A metaclass composing the above three metaclasses.
 
 ## Extending
 
-`EQV` uses the generic function `EQV-USING-CLASS` in a continuation-passing sty-- Oh who am I kidding, I have no idea how to nicely explain how to extend `EQV-USING-CLASS` with the current CPSesque architecture. Let me explain it in a non-nice way.
+`EQV` calls the generic function `EQV-USING-CLASS` in a continuation-passing style in order to avoid causing stack overflows on deeply nested structures or during cycle detection. This requires a particular style of writing methods on `EQV-USING-CLASS`.
 
-`EQV-USING-CLASS` accepts four arguments - the first two are the elements to be compared, and the other two are functions that are meant to be called. The value returned from `EQV-USING-CLASS` is ignored; a comparison failure must be performed via funcalling the `FAIL-FN` argument. (Why, phoe? Fix this. TODO)
+A single call to `EQV-USING-CLASS` is meant to perform a single comparison and return four values. The first one is the result of that comparison; `EQV` immediately returns `NIL` if that value is false at any time. The second, third, and fourth values are meaningful if a data structure is nested; the second and third value are the next objects to be compared via `EQV-USING-CLASS` (or `NIL` if there are no objects to compare) and the fourth value is a continuation function (or `NIL` if there is nothing left to compare) that should, similarly, return four values for the next pair of objects stored inside that recursive data structure.
 
-When it comes to comparing primitive types such as strings or symbols, it is enough to funcall the `FAIL-FN` if the two objects are not equivalent. For recursive data structures, though, the protocol is slightly more involved.
+Of course, if a particular method can ensure that it can compare its arguments without deep recursion, it is free to compute its result directly and return a generalized boolean as its first valie and return `NIL` as its secondary, tertiary, and quaternary values to indicate that. (See e.g. the methods defined for `SYMBOL` or `STRING`.)
 
-If a comparison requires making any recursive comparisons, `EQV` expects that `COMPARE-FN` will be called in `EQV-USING-CLASS`. The two mandatory arguments to that function must be values to be compared the next time. If there is more than one recursive comparison required, the third (optional) argument to that function should be a zero-arg continuation function that will call `COMPARE-FN` again for the next pair of values. Take a look at the implementations for conses, arrays, and hash-tables to get a feel for how you should proceed.
+Let's consider a small example: let's manually check if `'(1 (2 3))` is equivalent to `'(1 (2 3))` using only `EQV-USING-CLASS`.
 
-As long as this repository is in `phoe-trash`, this protocol might change. And let's hope it does - the current one absolutely sucks.
+```lisp
+VALUE-SEMANTICS-UTILS> (eqv-using-class '(1 (2 3)) '(1 (2 3)))
+T
+1
+1
+#<FUNCTION (LABELS CDR-CONTINUATION :IN EQV-USING-CLASS) {100BF70FDB}>
+```
+
+In this call, we get four values: the first value is true, and that means that we should continue comparing. The second and third values are values to be recursively compared via `EQV-USING-CLASS`, in this case, the `CAR`s of the cons cells; it calls `=` for numbers, so we'll skip that. The fourth value is a continuation function that should be called in order to give us the next set of values, in this case, the `CDR`s of these cons cells.
+
+```lisp
+VALUE-SEMANTICS-UTILS> (funcall (fourth /))
+T
+((2 3))
+((2 3))
+NIL
+```
+
+We see that the fourth return value is `NIL`, which means that the data structure has no more values that we should compare. That's understandable - a cons cell can only refer to two objects. We are free to compare the second and third value using `EQV-USING-CLASS`:
+
+```lisp
+VALUE-SEMANTICS-UTILS> (eqv-using-class (second /) (third /))
+T
+(2 3)
+(2 3)
+#<FUNCTION (LABELS CDR-CONTINUATION :IN EQV-USING-CLASS) {100BF821EB}>
+```
+
+And this goes on either until the first returned value is `NIL`, which immediately fails the comparison, or until the first value is true and the three remaining ones are `NIL`, which means that there is nothing left to compare.
+
+`EQV` also correctly handles a situation in which it needs to defer calling a continuation for later in order to compare the returned values first for preserving traversal order. It's done by allocating a closure on the heap, in which the values are compared by `EQV-USING-CLASS` and in which the continuation object will eventually be returned for processing.
+
+Why are the second and third values returned if, in theory, all we need is a boolean value to figure out if we need to continue the comparison and a continuation object to continue comparing? The answer is that `EQV` is capable of performing cycle detection, for which it needs to access the objects themselves in order to check their identity for cycle detection.
 
 ## License
 
@@ -294,7 +326,6 @@ If you don't want to wait for SBCL to catch up, evaluate the following in order 
 Trust me, I'm an engineer.
 
 ```lisp
-
 (in-package #:sb-pcl)
 
 (defmacro wrapper-class (wrapper)

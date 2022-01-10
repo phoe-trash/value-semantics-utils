@@ -3,10 +3,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; GFs
 
-(defgeneric eqv-using-class (x y compare-fn fail-fn))
+(defgeneric eqv-using-class (x y))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Default method called - condition
+;;; Default method
 
 (define-condition eqv-default-method-called (warning)
   ((args :reader eqv-default-method-called-args :initarg :args))
@@ -18,130 +18,186 @@
 
 (defvar *eqv-default-method-behavior* 'warn)
 
-(defmethod eqv-using-class (x y compare-fn fail-fn)
+(defmethod eqv-using-class (x y)
   (when *eqv-default-method-behavior*
     (funcall *eqv-default-method-behavior*
              'eqv-default-method-called
              :args (list x y)))
-  (funcall fail-fn))
+  (values nil nil nil nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementations for standard Common Lisp types
 
-(defmethod eqv-using-class ((x function) (y function) compare-fn fail-fn)
-  (unless (eq x y) (funcall fail-fn)))
+(defmethod eqv-using-class ((x function) (y function))
+  (values (eq x y) nil nil nil))
 
-(defmethod eqv-using-class ((x symbol) (y symbol) compare-fn fail-fn)
-  (unless (or (eq x y)
-              (and (null (symbol-package x))
-                   (null (symbol-package y))
-                   (string= (symbol-name x) (symbol-name y))))
-    (funcall fail-fn)))
+(defmethod eqv-using-class ((x symbol) (y symbol))
+  (declare (optimize speed))
+  (let ((result (or (eq x y)
+                    (and (null (symbol-package x))
+                         (null (symbol-package y))
+                         (string= (symbol-name x) (symbol-name y))))))
+    (values result nil nil nil)))
 
-(defmethod eqv-using-class ((x package) (y package) compare-fn fail-fn)
-  (unless (eq x y) (funcall fail-fn)))
+(defmethod eqv-using-class ((x package) (y package))
+  (values (eq x y) nil nil nil))
 
-(defmethod eqv-using-class ((x stream) (y stream) compare-fn fail-fn)
-  (unless (eq x y) (funcall fail-fn)))
+(defmethod eqv-using-class ((x stream) (y stream))
+  (values (eq x y) nil nil nil))
 
-(defmethod eqv-using-class ((x number) (y number) compare-fn fail-fn)
-  (unless (= x y) (funcall fail-fn)))
+(defmethod eqv-using-class ((x number) (y number))
+  (values (= x y) nil nil nil))
 
-(defmethod eqv-using-class ((x character) (y character) compare-fn fail-fn)
-  (unless (char= x y) (funcall fail-fn)))
+(defmethod eqv-using-class ((x character) (y character))
+  (values (char= x y) nil nil nil))
 
-(defmethod eqv-using-class ((x string) (y string) compare-fn fail-fn)
-  (unless (string= x y) (funcall fail-fn)))
+(defmethod eqv-using-class ((x string) (y string))
+  (values (string= x y) nil nil nil))
 
-(defmethod eqv-using-class ((x pathname) (y pathname) compare-fn fail-fn)
-  (unless (equal x y) (funcall fail-fn)))
+(defmethod eqv-using-class ((x pathname) (y pathname))
+  (values (equal x y) nil nil nil))
 
-(defmethod eqv-using-class
-    ((x cons) (y cons) compare-fn fail-fn)
-  (labels ((cdr-continuation () (funcall compare-fn (cdr x) (cdr y)))
-           (car-continuation () (funcall compare-fn (car x) (car y)
-                                         #'cdr-continuation)))
+(defmethod eqv-using-class ((x cons) (y cons))
+  (declare (optimize speed))
+  (labels ((cdr-continuation () (values t (cdr x) (cdr y) nil))
+           (car-continuation () (values t (car x) (car y) #'cdr-continuation)))
     (car-continuation)))
 
-(defmethod eqv-using-class ((x array) (y array) compare-fn fail-fn)
-  (declare (type function compare-fn fail-fn))
+(defmethod eqv-using-class ((x array) (y array))
   (declare (optimize speed))
   (declare #+sbcl (sb-ext:muffle-conditions sb-ext:compiler-note))
+  ;; If the dimensions are different, the comparison fails.
   (unless (equal (array-dimensions x) (array-dimensions y))
-    (funcall fail-fn))
-  (let ((index 0)
-        (array-total-size (array-total-size x)))
-    (declare (a:array-index index))
-    (when (plusp array-total-size)
-      (labels ((continuation ()
-                 (let ((i index))
+    (return-from eqv-using-class (values nil nil nil)))
+  (let ((array-total-size (array-total-size x)))
+    ;; If the arrays are empty, the comparison succeeds.
+    (when (= 0 array-total-size)
+      (return-from eqv-using-class (values t nil nil nil)))
+    ;; The arrays are not empty. Return a continuation that will compare them
+    ;; element-wise.
+    (let ((index 0))
+      (declare (a:array-index index))
+      (labels ((array-continuation ()
+                 (let ((x-element (row-major-aref x index))
+                       (y-element (row-major-aref y index)))
                    (incf index)
-                   (funcall compare-fn (row-major-aref x i) (row-major-aref y i)
-                            (when (< index array-total-size)
-                              #'continuation)))))
-        (continuation)))))
+                   (let ((continuation (if (< index array-total-size)
+                                           #'array-continuation
+                                           nil)))
+                     (values t x-element y-element continuation)))))
+        (array-continuation)))))
 
-(defmethod eqv-using-class ((x hash-table) (y hash-table) compare-fn fail-fn)
-  (declare (type function compare-fn fail-fn))
+(defmethod eqv-using-class ((x hash-table) (y hash-table))
   (declare (optimize speed))
+  ;; If the hash-table metadata is different, the comparison fails.
   (unless (and (= (hash-table-count x) (hash-table-count y))
                (eq (hash-table-test x) (hash-table-test y)))
-    (funcall fail-fn))
-  ;; We cannot close over WITH-HASH-TABLE-ITERATOR as it has dynamic extent.
-  (alexandria:when-let ((keys (alexandria:hash-table-keys x)))
-    (labels ((continuation ()
+    (return-from eqv-using-class (values nil nil nil nil)))
+  (let ((keys (alexandria:hash-table-keys x)))
+    ;; If the hash-tables are empty, the comparison succeeds.
+    (when (null keys)
+      (return-from eqv-using-class (values t nil nil nil)))
+    ;; The hash-tables are not empty. Return a continuation that will compare
+    ;; them key-and-value-wise.
+    (labels ((hash-table-continuation ()
                (let* ((key (car keys))
                       (x-value (gethash key x)))
                  (setf keys (cdr keys))
                  (multiple-value-bind (y-value y-value-p) (gethash key y)
-                   (unless y-value-p (funcall fail-fn))
-                   (funcall compare-fn x-value y-value
-                            (when keys
-                              #'continuation))))))
-      (continuation))))
+                   (unless y-value-p
+                     (return-from hash-table-continuation
+                       (values nil nil nil nil)))
+                   (let ((continuation (if (not (null keys))
+                                           #'hash-table-continuation
+                                           nil)))
+                     (return-from hash-table-continuation
+                       (values t x-value y-value continuation)))))))
+      (hash-table-continuation))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Holy shit I wrote this thing but I have no idea what or how it does help me
+;;; MERGE-CONTINUATIONS
 
-(defun eqv (x y &key (detect-cycles-p t))
+(defun merge-continuations (earlier-cont later-cont)
+  (declare (optimize speed))
+  (cond
+    ((null earlier-cont) later-cont)
+    ((null later-cont) earlier-cont)
+    (t (labels ((merged-continuation ()
+                  ;; Compute the values from the earlier continuation.
+                  (multiple-value-bind (successp x y mid-cont)
+                      (funcall (the function earlier-cont))
+                    (cond
+                      ;; Optimization: if SUCCESSP is false, EQV is going to
+                      ;; immediately quit anyway, so we can avoid computing
+                      ;; the RESULT-CONT and simply return all NILs.
+                      ((null successp)
+                       (values nil nil nil nil))
+                      ;; The earlier continuation halted. Return the later
+                      ;; continuation object.
+                      ((not mid-cont)
+                       (values t x y later-cont))
+                      ;; The earlier continuation did not halt. Remember the
+                      ;; returned continuation object, forward the returned
+                      ;; values, and return this merged continuation closure
+                      ;; that will eventually return the later continuation.
+                      (t
+                       (setf earlier-cont mid-cont)
+                       (values successp x y #'merged-continuation))))))
+         #'merged-continuation))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; EQV
+
+(defun %eqv (start-continuation detect-cycles-p)
   (declare (optimize speed))
   (w:with-macroexpand-time-branching (detect-cycles-p)
-    (let ((continuation nil)
+    ;; Object equivalence owns the sky.
+    ;; This thing can handle cycles on a dime,
+    ;; continuation-passing style.
+    (let ((continuation start-continuation)
           (state (w:macroexpand-time-when detect-cycles-p
                    (make-hash-table :test #'eq))))
+      (declare (type function continuation))
       ;; STATE is never accessed if DETECT-CYCLES-P is false.
       (declare (ignorable state))
-      (labels ((fail () (return-from eqv nil))
-               (compare (x y &optional thunk)
-                 (declare (type (or null function) thunk))
-                 (flet ((stack-frame ()
-                          (w:macroexpand-time-when detect-cycles-p
-                            ;; Have we already visited this pair of objects?
-                            (when (member y (gethash x state) :test #'eq)
-                              ;; We have - call the thunk, then bail out.
-                              (when thunk (funcall thunk))
-                              (return-from stack-frame))
-                            ;; We haven't - store the objects in the hashtable.
-                            (pushnew y (gethash x state) :test #'eq))
-                          ;; Defer the actual comparison to EQV-USING-CLASS
-                          ;; and call the thunk.
-                          (eqv-using-class x y #'compare #'fail)
-                          (when thunk (funcall thunk))))
-                   (let ((old-continuation continuation))
-                     (setf continuation
-                           (if old-continuation
-                               ;; We must store the old continuation and
-                               ;; call it before we call the new stack frame.
-                               (lambda ()
-                                 (funcall (the function old-continuation))
-                                 (funcall #'stack-frame))
-                               #'stack-frame))))))
-        ;; Handle the starting elements.
-        (compare x y)
-        ;; Loop until there is no continuation.
-        (loop until (null continuation)
-              for old-continuation = continuation
-              do (setf continuation nil)
-                 (funcall (the function old-continuation)))
-        ;; If there was no non-local exit, the match is complete.
-        t))))
+      ;; Manual iteration time.
+      (tagbody :start
+         ;; Compute the new set of iteration values.
+         (multiple-value-bind (result x y new-continuation)
+             (funcall continuation)
+           ;; Handle possible comparison failure.
+           (when (null result) (return-from %eqv nil))
+           ;; Handle possible comparison success.
+           (when (and (null x) (null y) (null new-continuation))
+             (return-from %eqv t))
+           ;; If we're detecting cycles...
+           (w:macroexpand-time-when detect-cycles-p
+             ;; ...have we already been here?
+             (cond ((or (and (null x) (null y))
+                        (member y (gethash x state) :test #'eq))
+                    ;; Yes - we've already successfully compared these objects.
+                    ;; Is there a new continuation?
+                    (cond (new-continuation
+                           ;; Yes - set it and leave.
+                           (setf continuation new-continuation)
+                           (go :start))
+                          ;; No - we're done, we've found the last cycle!
+                          (t (return-from %eqv t))))
+                   ;; No - remember the objects for later.
+                   (t (pushnew y (gethash x state) :test #'eq))))
+           ;; We assume there is no cycle. Where do we go now?
+           (cond ((and x y)
+                  ;; We have new values to compare.
+                  (setf continuation
+                        ;; If both values and a new continuation were returned,
+                        ;; queue the continuation and compare the values first.
+                        (merge-continuations (lambda () (eqv-using-class x y))
+                                             new-continuation)))
+                 (t
+                  ;; No new values  - use the new continuation as-is.
+                  (setf continuation new-continuation)))
+           ;; New continuation is set, time for a new iteration.
+           (go :start))))))
+
+(defun eqv (x y &key (detect-cycles-p t))
+  (%eqv (lambda () (eqv-using-class x y)) detect-cycles-p))

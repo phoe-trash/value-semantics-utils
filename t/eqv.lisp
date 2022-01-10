@@ -121,11 +121,10 @@
 
 (defvar *eqv-test-class-eqv*)
 
-(defmethod vs:eqv-using-class ((x eqv-test-class) (y eqv-test-class)
-                               compare-fn fail-fn)
-  (unless *eqv-test-class-eqv*
-    (funcall fail-fn))
-  (funcall compare-fn x y))
+(defmethod vs:eqv-using-class ((x eqv-test-class) (y eqv-test-class))
+  (if *eqv-test-class-eqv*
+      (values t nil nil nil)
+      (values nil nil nil nil)))
 
 (define-test eqv-custom-method :parent eqv
   (let ((x (make-instance 'eqv-test-class))
@@ -139,13 +138,12 @@
 
 (defvar *count*)
 
-(defmethod vs:eqv-using-class ((x eqv-cycle-test) (y eqv-cycle-test)
-                               compare-fn fail-fn)
-  (when (> *count* 100)
-    (throw 'successful t))
+(defmethod vs:eqv-using-class ((x eqv-cycle-test) (y eqv-cycle-test))
   (labels ((continuation ()
              (incf *count*)
-             (funcall compare-fn x y #'continuation)))
+             (when (> *count* 100)
+               (throw 'successful t))
+             (values t nil nil #'continuation)))
     (continuation)))
 
 (define-test eqv-no-cycle :parent eqv
