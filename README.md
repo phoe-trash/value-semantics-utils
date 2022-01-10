@@ -15,15 +15,16 @@ For such a programming style, the following assumptions should hold true:
 * Data should be represented via primitive Common Lisp types and standard classes.
   * It should be possible to use cyclic references for programming convenience.
 * It should be possible to consider a type mismatch an abnormal situation while comparing for equivalence.
-  * It should be possible to use `:type` arguments for class slots and have runtime assertions for type checks without risking undefined behavior or depending on implementation-defined behavior.
-* Value semantics should be used to compare data for ~~equality~~equivalence. In particular, two classes should be equivalent if their types and contents are equivalent.
-  * The only exception to using pure value semantics should be cycle detection in data structures, for which there seems to be no solution better than identity comparison.
-    * (Thankfully, there are no generators or infinite lists in Lisp.)
-* There should be a way to ensure, on the MOP level, that a slot in an instance is...
+  * It should be possible to use `:type` keyword arguments for class slots and have runtime assertions for type checks without risking undefined behavior or depending on implementation-defined behavior.
+* Value semantics should be used to compare data for ~~equality~~equivalence.
+  * Two Lisp objects should be recognized as equivalent if their types and contents are equivalent.
+  * It should be possible to extend the equivalence predicate with user code.
+  * Cyclic data structures which are impossible to tell apart value-wise (e.g. `#1=(1 2 3 . #1#)` and `#2=(1 2 3 1 2 3 . #2#)`) should be recognized as equivalent.
+* For convenice and type safety, there should be a way to ensure, on the MOP level, that a slot in an instance is...
   * ...meant to be always bound,
   * ...meant to always contain a value of a particular type.
 
-This repository contains a series of utilities meant to facilitate this style of programming.
+This repository contains a collection of utilities meant to facilitate this style of programming.
 
 ## Manual
 
