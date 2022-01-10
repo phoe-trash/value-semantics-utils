@@ -2,10 +2,11 @@
 
 An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is:
 
-* written to not overflow the stack,
+* capable of working with standard Common Lisp data types by default,
 * user-extensible via `GENERIC-EQV`,
-* configurable to not hang on cycles,
-* configure to signal a `EQV-DEFAULT-METHOD-CALLED` condition (a subtype of `WARNING`) in case of fallthrough to the default method (e.g. for type mismatches).
+* capable of detecting cycles by default,
+* designed to never overflow the stack even on deeply nested structures or when working with long cycles,
+* configurable to signal a `EQV-DEFAULT-METHOD-CALLED` warning in case of fallthrough to the default method (e.g. for type mismatches).
 
 ## API
 
@@ -37,7 +38,7 @@ Methods are defined for `X` and `Y` both specialized to the following classes:
 * `ARRAY` - compares array dimensions via `EQUAL`, then compares elements recursively via `GENERIC-EQV`;
 * `HASH-TABLE` - compares hash table counts via `=`, then compares hash table test via `EQ`, then compares keys and values recursively via `GENERIC-EQV`;
 * `OBJECT-WITH-VALUE-SEMANTICS` (see [the classes manual](CLASSES.md)) - compares the objects' classes via `EQ`, then recursively compares slot values via `GENERIC-EQV`;
-* `T` - maybe signals a `EQV-DEFAULT-METHOD-CALLED`, then fails the comparison.
+* `T` - compares via `EQ`, then maybe signals a `EQV-DEFAULT-METHOD-CALLED` and fails the comparison.
 
 For conses, arrays and hash-tables, `EQV` are defined to work similarly to `EQUALP`, except it uses `GENERIC-EQV` for recursively comparing the elements of these collections.
 

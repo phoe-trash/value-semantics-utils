@@ -19,11 +19,17 @@
 (defvar *eqv-default-method-behavior* 'warn)
 
 (defmethod generic-eqv (x y)
-  (when *eqv-default-method-behavior*
-    (funcall *eqv-default-method-behavior*
-             'eqv-default-method-called
-             :args (list x y)))
-  (values nil nil nil nil))
+  (cond ((eq x y)
+         ;; In theory, we should invoke EQV-DEFAULT-METHOD-CALLED logic here,
+         ;; but if two objects are EQ to each other then, by definition, they
+         ;; are also EQV to each other.
+         (values t nil nil nil))
+        (t
+         (when *eqv-default-method-behavior*
+           (funcall *eqv-default-method-behavior*
+                    'eqv-default-method-called
+                    :args (list x y)))
+         (values nil nil nil nil))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Implementations for standard Common Lisp types
