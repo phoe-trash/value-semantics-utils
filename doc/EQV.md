@@ -37,7 +37,7 @@ Methods are defined for `X` and `Y` both specialized to the following classes:
 * `CONS` - compares the `CAR` and `CDR` recursively via `GENERIC-EQV`;
 * `ARRAY` - compares array dimensions via `EQUAL`, then compares elements recursively via `GENERIC-EQV`;
 * `HASH-TABLE` - compares hash table counts via `=`, then compares hash table test via `EQ`, then compares keys and values recursively via `GENERIC-EQV`;
-* `OBJECT-WITH-VALUE-SEMANTICS` (see [the classes manual](CLASSES.md)) - compares the objects' classes via `EQ`, then recursively compares slot values via `GENERIC-EQV`;
+* `OBJECT-WITH-VALUE-SEMANTICS` (see [the classes manual](CLASSES.md#value-semantics)) - compares the objects' classes via `EQ`, then recursively compares slot values via `GENERIC-EQV`;
 * `T` - compares via `EQ`, then maybe signals a `EQV-DEFAULT-METHOD-CALLED` and fails the comparison.
 
 For conses, arrays and hash-tables, `EQV` are defined to work similarly to `EQUALP`, except it uses `GENERIC-EQV` for recursively comparing the elements of these collections.
