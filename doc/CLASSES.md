@@ -1,5 +1,7 @@
 # VALUE-SEMANTICS-UTILS Classes
 
+A collection of metaclasses designed to ease working with projects that utilize value semantics and mostly-functional programming with CLOS.
+
 ## Value semantics
 
 ### **Class `CLASS-WITH-VALUE-SEMANTICS`**
