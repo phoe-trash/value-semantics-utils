@@ -25,7 +25,7 @@ The keyword argument `detect-cycles-p` drives the cycle detection engine. Set it
 With cycle detection:
 
 ```lisp
-CL-USER> (let ((x '#1=(1 2 3 . #1#)) (y '#2=(1 2 3 1 2 3 . #2#)))
+CL-USER> (let ((x '#1=(1 2 3 . #1#)) (y '#2=(1 2 3 . #2#)))
            (vs:eqv x y))
 T
 
@@ -46,7 +46,7 @@ Without cycle detection:
 ```lisp
 CL-USER> (let ((x '#1=(1 2 3 . #1#)) (y '#2=(1 2 3 1 2 3 . #2#)))
            (vs:eqv x y :detect-cycles-p nil))
-;;; hangs forever
+;;; loops forever
 
 CL-USER> (let ((x (make-list 10000000)) (y (make-list 10000000)))
            (time (vs:eqv x y :detect-cycles-p nil)))
@@ -57,6 +57,19 @@ Evaluation took:
   100.10% CPU
   3,426,144,609 processor cycles
   959,987,792 bytes consed
+T
+```
+
+Note that cycle detection is capable of detecting cycles which are equivalent value-wise, but whose underlying storage has different length.
+
+```lisp
+CL-USER> (eqv '#1=(1 2 3 1 2 3 . #1#) '#2=(1 2 3 . #2#))
+T
+
+CL-USER> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 1 2 3 . #2#))
+T
+
+CL-USER> (eqv '#1=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 . #1#) '#2=(1 . #2#))
 T
 ```
 
@@ -82,33 +95,7 @@ Methods are defined for `X` and `Y` both specialized to the following classes:
 * `OBJECT-WITH-VALUE-SEMANTICS` (see [the classes manual](CLASSES.md#value-semantics)) - compares the objects' classes via `EQ`, then recursively compares slot values via `GENERIC-EQV`;
 * `T` - compares via `EQ`, then maybe signals a `EQV-DEFAULT-METHOD-CALLED`, then fails the comparison.
 
-For conses, arrays and hash-tables, `EQV` are defined to work similarly to `EQUALP`, except it uses `GENERIC-EQV` for recursively comparing the elements of these collections.
-
-### **Variable `*EQV-RESOLVE-CYCLES-P*`** 
-
-A dynamic variable controlling whether `EQV` will check object identity (via `EQ`) to detect cycles. Defaults to true. Rebind it to false for saving some memory if you are **sure** that the data you are comparing contains no cycles.
-
-```lisp
-CL-USER> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#))
-T
-
-CL-USER> (let ((*eqv-resolve-cycles-p* nil))
-           (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 . #2#)))
-;;; loops until the heap goes boom
-```
-
-Note that cycle detection is capable of detecting cycles which are equivalent value-wise, but whose underlying storage has different length.
-
-```lisp
-CL-USER> (eqv '#1=(1 2 3 1 2 3 . #1#) '#2=(1 2 3 . #2#))
-T
-
-CL-USER> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 1 2 3 . #2#))
-T
-
-CL-USER> (eqv '#1=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 . #1#) '#2=(1 . #2#))
-T
-```
+For conses, arrays and hash-tables, `EQV` is defined to work similarly to `EQUALP`, except it uses `GENERIC-EQV` for recursively comparing the elements of these collections.
 
 ### **Condition Type `EQV-DEFAULT-METHOD-CALLED`**
 
