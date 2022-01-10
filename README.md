@@ -40,7 +40,9 @@ MIT.
 
 ## Tested on
 
-SBCL 2.1.11 with some custom fixups. Nowhere else, yet. Expect breakage because of high doses of MOP wizardry, even though this library uses `closer-mop`.
+`EQV` contains only portable code should work on every Common Lisp implementation. The classes might not, because CLOS and MOP are hard.
+
+The classes were tested on SBCL 2.1.11 with some custom fixups. Nowhere else, yet. Expect breakage because of high doses of MOP wizardry, even though this library uses `closer-mop`.
 
 On SBCL, we need to wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed ~~and for the [patch](https://sourceforge.net/p/sbcl/mailman/sbcl-devel/thread/6ae094ba-eeea-6bfe-b43d-970d97040830%40disroot.org/) that stabilizes behavior for failed `U-I-F-{R,D}-C` to get merged~~. Sigh. MOP is hard. MOP interactions with everything else are even harder.
 
