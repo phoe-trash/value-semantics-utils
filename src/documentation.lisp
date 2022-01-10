@@ -18,17 +18,17 @@ condition of type EQV-DEFAULT-METHOD-CALLED.
 
 See EQV-DEFAULT-METHOD-CALLED."
  (documentation 'eqv-default-method-called 'type)
- "The condition type signaled whenever the EQV default method is called.
+ "The condition type signaled whenever the GENERIC-EQV default method is called.
 
 See *EQV-DEFAULT-METHOD-BEHAVIOR*
 See EQV-DEFAULT-METHOD-CALLED-X
 See EQV-DEFAULT-METHOD-CALLED-Y"
  (documentation 'eqv-default-method-called-x 'function)
- "The first argument that the EQV default method was called with.
+ "The first argument that the GENERIC-EQV default method was called with.
 
 See EQV-DEFAULT-METHOD-CALLED"
  (documentation 'eqv-default-method-called-y 'function)
- "The second argument that the EQV default method was called with.
+ "The second argument that the GENERIC-EQV default method was called with.
 
 See EQV-DEFAULT-METHOD-CALLED")
 

@@ -32,7 +32,7 @@ NIL
 
 CL-USER> (eqv (make-instance 'foo :slot 42)
               (make-instance 'foo :slot "42"))
-;;; WARNING: EQV default method called with (42 "42"); possible type error?
+;;; WARNING: GENERIC-EQV default method called with (42 "42"); possible type error?
 NIL
 
 CL-USER> (eqv (make-instance 'foo :slot (make-instance 'foo))

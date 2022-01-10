@@ -89,17 +89,17 @@ CL-USER> (let ((*eqv-default-method-behavior* 'signal))
            (flet ((note (c) (format t ";; ~A" c)))
              (handler-bind ((eqv-default-method-called #'note))
                (eqv 42 "42"))))
-;; EQV default method called with (42 "42"); possible type error?
+;; GENERIC-EQV default method called with (42 "42"); possible type error?
 NIL
 
 CL-USER> (let ((*eqv-default-method-behavior* 'warn)) ; the default
            (eqv 42 "42"))
-;;; WARNING: EQV default method called with (42 "42"); possible type error?
+;;; WARNING: GENERIC-EQV default method called with (42 "42"); possible type error?
 NIL
 
 CL-USER> (let ((*eqv-default-method-behavior* 'error))
            (eqv 42 "42"))
-;;; Error: EQV default method called with (42 "42"); possible type error?
+;;; Error: GENERIC-EQV default method called with (42 "42"); possible type error?
 ;;;   [Condition of type EQV-DEFAULT-METHOD-CALLED]
 
 ```
