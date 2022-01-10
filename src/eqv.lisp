@@ -172,19 +172,20 @@
              (return-from %eqv t))
            ;; If we're detecting cycles...
            (w:macroexpand-time-when detect-cycles-p
-             ;; ...have we already been here?
-             (cond ((or (and (null x) (null y))
-                        (member y (gethash x state) :test #'eq))
-                    ;; Yes - we've already successfully compared these objects.
-                    ;; Is there a new continuation?
-                    (cond (new-continuation
-                           ;; Yes - set it and leave.
-                           (setf continuation new-continuation)
-                           (go :start))
-                          ;; No - we're done, we've found the last cycle!
-                          (t (return-from %eqv t))))
-                   ;; No - remember the objects for later.
-                   (t (pushnew y (gethash x state) :test #'eq))))
+             ;; ...then, have we already been here?
+             (cond ((and x y (not (member y (gethash x state) :test #'eq)))
+                    ;; We haven't - remember that pair of objects for later.
+                    (pushnew y (gethash x state) :test #'eq))
+                   ;; OK, so we have already seen that pair of objects befote.
+                   ;; Is there a new continuation?
+                   (new-continuation
+                    ;; Then set it for processing in the next iteration
+                    ;; and jump to it.
+                    (setf continuation new-continuation)
+                    (go :start))
+                   ;; We've already compared these objects and there's no
+                   ;; continuation to call. Nothing more to be done.
+                   (t (return-from %eqv t))))
            ;; We assume there is no cycle. Where do we go now?
            (cond ((and x y)
                   ;; We have new values to compare.
