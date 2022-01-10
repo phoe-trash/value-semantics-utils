@@ -34,6 +34,10 @@ There are three sources of authority for the code in this repository:
 * the [classes manual](doc/CLASSES.md),
 * the [test suite](t/) containing more examples and edge cases.
 
+## Testing
+
+`(asdf:test-system :value-semantics-utils)`
+
 ## License
 
 MIT.
