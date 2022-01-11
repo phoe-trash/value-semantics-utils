@@ -12,9 +12,10 @@
   ((args :reader eqv-default-method-called-args :initarg :args))
   (:default-initargs :args (a:required-argument :args))
   (:report (lambda (condition stream)
-             (format stream "GENERIC-EQV: default method called ~
-                             with ~S; possible type error?"
-                     (eqv-default-method-called-args condition)))))
+             (let ((*print-circle* t))
+               (format stream "GENERIC-EQV: default method called ~
+                               with ~S; possible type error?"
+                       (eqv-default-method-called-args condition))))))
 
 (defvar *eqv-default-method-behavior* 'warn)
 
