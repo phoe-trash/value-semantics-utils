@@ -185,7 +185,7 @@
                                               (make-hash-table :test #'eq)))))
                     ;; We haven't - remember that pair of objects for later.
                     (setf (gethash y (gethash x state)) t))
-                   ;; OK, so we have already seen that pair of objects befote.
+                   ;; OK, so we have already seen that pair of objects before.
                    ;; Is there a new continuation?
                    (new-continuation
                     ;; Then set it for processing in the next iteration
