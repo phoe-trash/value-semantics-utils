@@ -157,12 +157,12 @@
 
 (defun %eqv (start-continuation detect-cycles-p)
   (declare (optimize speed))
-  (w:with-macroexpand-time-branching (detect-cycles-p)
+  (w:with-branching (detect-cycles-p)
     ;; Object equivalence owns the sky.
     ;; This thing can handle cycles on a dime,
     ;; continuation-passing style.
     (let ((continuation start-continuation)
-          (state (w:macroexpand-time-when detect-cycles-p
+          (state (w:branch-when detect-cycles-p
                    (make-hash-table :test #'eq))))
       (declare (type function continuation))
       ;; STATE is never accessed if DETECT-CYCLES-P is false.
@@ -178,7 +178,7 @@
            (when (and (null x) (null y) (null new-continuation))
              (return-from %eqv t))
            ;; If we're detecting cycles...
-           (w:macroexpand-time-when detect-cycles-p
+           (w:branch-when detect-cycles-p
              ;; ...then, have we already been here?
              (cond ((and x y (not (gethash y (a:ensure-gethash
                                               x state

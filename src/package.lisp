@@ -2,7 +2,7 @@
   (:use #:c2cl)
   (:local-nicknames (#:a #:alexandria)
                     (#:u #:moptilities)
-                    (#:w #:with-macroexpand-time-branching))
+                    (#:w #:with-branching))
   (:export
    ;; EQV
    #:eqv

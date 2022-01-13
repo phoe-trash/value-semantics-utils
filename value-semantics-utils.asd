@@ -9,7 +9,7 @@
   :depends-on (#:alexandria
                #:closer-mop
                #:moptilities
-               #:with-macroexpand-time-branching)
+               #:with-branching)
   :pathname "src"
   :components ((:file "package")
                (:file "eqv")
