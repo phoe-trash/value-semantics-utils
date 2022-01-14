@@ -13,7 +13,7 @@ An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is:
 ### **Function `EQV`**
 
 ```lisp
-(eqv x y &key (detect-cycles-p t)) → boolean
+(eqv x y &key (detect-cycles-p t) (comparator #'generic-eqv)) → boolean
 ```
 
 The main entry point to the equivalence comparator.
