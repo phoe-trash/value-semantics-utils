@@ -22,6 +22,8 @@ The keyword argument `detect-cycles-p` drives the cycle detection engine. Set it
 * true, to be able to not hang on cyclic references,
 * false, for a major speedup and a decrease in memory usage and GC pressure.
 
+The keyword argument `comparator` defines the comparator function that will be used for comparison. Defaults to `#'GENERIC-EQV`. For details about writing your own comparator, see [Extending](#extending).
+
 With cycle detection:
 
 ```lisp

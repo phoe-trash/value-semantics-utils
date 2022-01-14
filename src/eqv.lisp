@@ -155,7 +155,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; EQV
 
-(defun %eqv (start-continuation detect-cycles-p)
+(defun %eqv (start-continuation detect-cycles-p comparator)
   (declare (optimize speed))
   (w:with-branching (detect-cycles-p)
     ;; Object equivalence owns the sky.
@@ -201,13 +201,14 @@
                   (setf continuation
                         ;; If both values and a new continuation were returned,
                         ;; queue the continuation and compare the values first.
-                        (merge-continuations (lambda () (generic-eqv x y))
-                                             new-continuation)))
+                        (merge-continuations
+                         (lambda () (funcall comparator x y))
+                         new-continuation)))
                  (t
                   ;; No new values  - use the new continuation as-is.
                   (setf continuation new-continuation)))
            ;; New continuation is set, time for a new iteration.
            (go :start))))))
 
-(defun eqv (x y &key (detect-cycles-p t))
-  (%eqv (lambda () (generic-eqv x y)) detect-cycles-p))
+(defun eqv (x y &key (detect-cycles-p t) (comparator #'generic-eqv))
+  (%eqv (lambda () (generic-eqv x y)) detect-cycles-p comparator))

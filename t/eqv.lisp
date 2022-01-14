@@ -154,3 +154,12 @@
                     (vs:eqv x y :detect-cycles-p nil)
                     nil)))
       (true result))))
+
+(defun mod-5-generic-eqv (x y)
+  (if (and (realp x) (realp y))
+      (= (mod x 5) (mod y 5))
+      (vs:generic-eqv x y)))
+
+(define-test eqv-custom-comparator :parent eqv
+  (flet ((mod-5-eqv (x y) (vs:eqv x y :comparator #'mod-5-generic-eqv)))
+    (is #'mod-5-eqv '(1 (2 3) :four "5") '(11 (2002 8) :four "5"))))
