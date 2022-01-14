@@ -157,7 +157,7 @@
 
 (defun mod-5-generic-eqv (x y)
   (if (and (realp x) (realp y))
-      (= (mod x 5) (mod y 5))
+      (values (= (mod x 5) (mod y 5)) nil nil nil)
       (vs:generic-eqv x y)))
 
 (define-test eqv-custom-comparator :parent eqv

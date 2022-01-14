@@ -6,12 +6,12 @@ Utilities for using CLOS for mostly-functional programming.
 
 There are two worlds in programming: an imperative one, full of objects and comparisons by identity, and a functional one, full of referential transparency and comparisons by value. Common Lisp is good at both, and I ended up realizing that I wanted to develop in a style which integrates both of these paradigms.
 
-In particular, I want my data structures to be mostly immutable and the logic of my program to be pure and without side effects, but I'd like to structure my data via standard classes and have the possibility to mutate objects wherever it cannot be observed in the higher-level logic.
+In particular, I want my data structures to be mostly immutable and the logic of my program to be pure and without side effects, and to keep my object graphs immutable. At the same time, I'd like to structure my data via standard classes and have the possibility to copy parts of my object graphs and mutate these copies in order to produce new structures while maximizing data sharing.
 
 For such a programming style, the following assumptions should hold true:
 
 * Data should be immutable and structure sharing should be common wherever possible.
-  * It should be possible to use imperative logic wherever doing so does not mutate existing data.
+  * It should be possible to use imperative logic and operations wherever doing so does not mutate existing data.
 * Data should be represented via primitive Common Lisp types and standard classes.
   * It should be possible to use cyclic references for programming convenience.
 * It should be possible to consider a type mismatch an abnormal situation while comparing for equivalence.
@@ -24,13 +24,14 @@ For such a programming style, the following assumptions should hold true:
   * meant to be always bound,
   * meant to always contain a value of a particular type.
 
-This repository contains a collection of utilities meant to facilitate this style of programming.
+In order to be able to work with these assumptions, it is important to define [operations for copying and equivalence](http://www.nhplace.com/kent/PS/EQUAL.html), as well as define their effects on data structures which we want to operate on. This repository contains a collection of utilities implementing this programming style.
 
 ## Manual
 
 There are three sources of authority for the code in this repository:
 
 * the [`EQV` manual](doc/EQV.md),
+* the copier-modifier manual (TODO),
 * the [classes manual](doc/CLASSES.md),
 * the [test suite](t/) containing more examples and edge cases.
 

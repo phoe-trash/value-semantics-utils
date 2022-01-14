@@ -8,21 +8,27 @@ An equivalence predicate that acts similar to `EQUAL` or `EQUALP`. It is:
 * designed to never overflow the stack even on deeply nested structures or when working with long cycles,
 * configurable to signal a `EQV-DEFAULT-METHOD-CALLED` warning in case of fallthrough to the default method (e.g. for type mismatches).
 
+## Why?
+
+See the [main readme](../README.md) for rationale.
+
 ## API
 
 ### **Function `EQV`**
 
 ```lisp
-(eqv x y &key (detect-cycles-p t) (comparator #'generic-eqv)) → boolean
+(eqv x y &key (comparator #'generic-eqv) (detect-cycles-p t)) → boolean
 ```
 
-The main entry point to the equivalence comparator.
+The main entry point to the equivalence test function.
+
+The keyword argument `comparator` defines the comparator function that will be used for comparison. Defaults to `#'GENERIC-EQV`. For details about writing your own comparator, see [Extending](#extending).
 
 The keyword argument `detect-cycles-p` drives the cycle detection engine. Set it to:
 * true, to be able to not hang on cyclic references,
 * false, for a major speedup and a decrease in memory usage and GC pressure.
 
-The keyword argument `comparator` defines the comparator function that will be used for comparison. Defaults to `#'GENERIC-EQV`. For details about writing your own comparator, see [Extending](#extending).
+#### Examples
 
 With cycle detection:
 
@@ -72,6 +78,25 @@ CL-USER> (eqv '#1=(1 2 3 . #1#) '#2=(1 2 3 1 2 3 . #2#))
 T
 
 CL-USER> (eqv '#1=(1 1 1 1 1 1 1 1 1 1 1 1 1 1 . #1#) '#2=(1 . #2#))
+T
+```
+
+Without a custom comparator:
+
+```lisp
+CL-USER> (eqv '(1 2 3 4 5 6) '(11 22 33 44 55 111))
+NIL
+```
+
+With a custom comparator:
+
+```lisp
+(defun mod-5-generic-eqv (x y)
+  (if (and (realp x) (realp y))
+      (values (= (mod x 5) (mod y 5)) nil nil nil)
+      (vs:generic-eqv x y)))
+
+CL-USER> (eqv '(1 2 3 4 5 6) '(11 22 33 44 55 111) :comparator #'mod-5-generic-eqv)
 T
 ```
 
