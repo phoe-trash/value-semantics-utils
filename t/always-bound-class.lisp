@@ -38,9 +38,13 @@
     (is = 24 (slot-value instance 'slot))))
 
 (define-test always-bound-class-slot-makunbound :parent always-bound-class
-  (let ((instance (make-instance 'test-always-bound-class :slot 42)))
-    (handler-bind ((unbound-slot (lambda (c) (store-value 0 c))))
+  (let ((instance (make-instance 'test-always-bound-class :slot 42))
+        (handler-executed-p nil))
+    (handler-bind ((unbound-slot (lambda (c)
+                                   (setf handler-executed-p t)
+                                   (store-value 0 c))))
       (slot-makunbound instance 'slot))
+    (true handler-executed-p)
     (is = 0 (slot-value instance 'slot))))
 
 (define-test always-bound-class-reinitialize-instance :parent always-bound-class

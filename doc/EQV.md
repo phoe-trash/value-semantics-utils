@@ -110,7 +110,7 @@ A means of programming `EQV`. Not meant to be called directly, programmers can w
 
 Methods are defined for `X` and `Y` both specialized to the following classes:
 * `FUNCTION` - compares via `EQ`;
-* `SYMBOL` - compares interned symbols via `EQ` and uninterned symbols via `STRING=` of their names;
+* `SYMBOL` - compares interned symbols via `EQ` and uninterned symbols via `STRING=`;
 * `PACKAGE` - compares via `EQ`;
 * `STREAM` - compares via `EQ`;
 * `NUMBER` - compares via `=`;

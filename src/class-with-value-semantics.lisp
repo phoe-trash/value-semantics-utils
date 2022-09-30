@@ -6,7 +6,7 @@
 (defclass object-with-value-semantics (standard-object) ())
 
 (defmethod generic-eqv ((x object-with-value-semantics)
-                            (y object-with-value-semantics))
+                        (y object-with-value-semantics))
   (declare (optimize speed))
   (let ((x-class (class-of x))
         (y-class (class-of y)))
