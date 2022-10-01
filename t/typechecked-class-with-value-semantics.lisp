@@ -68,8 +68,9 @@
 (define-test typechecked-class-with-value-semantics-reinitialize-instance
   :parent typechecked-class-with-value-semantics
   (let ((instance (make-instance 'test-typechecked-class-with-value-semantics
-                                 :slot-2 nil :slot-3 :foo)))
+                                 :slot-1 24 :slot-2 nil :slot-3 :foo)))
     (reinitialize-instance instance :slot-3 :bar)
+    (is = 24 (slot-value instance 'slot-1))
     (is eq :bar (slot-value instance 'slot-3))))
 
 (define-test

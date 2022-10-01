@@ -42,8 +42,9 @@
 
 (define-test typechecked-class-reinitialize-instance :parent typechecked-class
   (let ((instance (make-instance 'test-typechecked-class
-                                 :slot-2 nil :slot-3 :foo)))
+                                 :slot-1 24 :slot-2 nil :slot-3 :foo)))
     (reinitialize-instance instance :slot-3 :bar)
+    (is = 24 (slot-value instance 'slot-1))
     (is eq :bar (slot-value instance 'slot-3))))
 
 (define-test typechecked-class-update-instance-for-redefined-class
