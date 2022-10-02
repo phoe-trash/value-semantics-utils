@@ -12,6 +12,7 @@
    #:eqv-default-method-called-args
    ;; CLASS-WITH-VALUE-SEMANTICS
    #:object-with-value-semantics
+   #:copy
    #:class-with-value-semantics
    ;; ALWAYS-BOUND-CLASS
    #:always-bound-object

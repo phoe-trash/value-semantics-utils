@@ -77,3 +77,14 @@
         (instance-2 (make-instance 'other-test-class-with-value-semantics
                                    :slot-1 42 :slot-2 24)))
     (isnt vs:eqv instance-1 instance-2)))
+
+(define-test class-with-value-semantics-copy
+  :parent class-with-value-semantics
+  (let* ((instance-1 (make-instance 'test-class-with-value-semantics
+                                    :slot-1 42 :slot-2 24))
+         (instance-2 (vs:copy instance-1))
+         (instance-3 (vs:copy instance-1 :slot-1 1000)))
+    (is = 1000 (slot-value instance-3 'slot-1))
+    (is = 24 (slot-value instance-3 'slot-2))
+    (is vs:eqv instance-1 instance-2)
+    (isnt vs:eqv instance-1 instance-3)))

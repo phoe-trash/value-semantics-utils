@@ -6,7 +6,7 @@ A collection of metaclasses designed to ease working with projects that utilize 
 
 ### **Class `CLASS-WITH-VALUE-SEMANTICS`**
 
-A metaclass whose metainstances are automatically comparable slotwise via [`EQV`](EQV.md).
+A metaclass whose metainstances are automatically comparable slotwise via [`EQV`](EQV.md) and copiable via `COPY`.
 
 ### **Class `OBJECT-WITH-VALUE-SEMANTICS`**
 
@@ -48,6 +48,14 @@ CL-USER> (eqv (make-instance 'foo :slot 42)
               (make-instance 'bar :slot 42))
 NIL
 ```
+
+### **Generic Function `COPY`**
+
+Lambda list: `(copy original &rest initargs)`
+
+Performs copying of the object.
+
+The default method is specialized on `OBJECT-WITH-VALUE-SEMANTICS` and allocates a new instance of the same class as the original, sets the values of all bound slots to be the same as the original, and then calls `REINITIALIZE-INSTANCE` on the copy and `INITARGS`.
 
 ## Always-bound
 

@@ -157,6 +157,7 @@
 
 (defun %eqv (start-continuation detect-cycles-p comparator)
   (declare (optimize speed))
+  (declare (type function comparator))
   (w:with-branching (detect-cycles-p)
     ;; Object equivalence owns the sky.
     ;; This thing can handle cycles on a dime,
