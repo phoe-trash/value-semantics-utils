@@ -63,6 +63,12 @@
            (y (make :slot-2 42)))
       (setf (slot-value x 'slot-1) x
             (slot-value y 'slot-1) x)
+      (isnt vs:eqv x y))
+    (let ((x (make :slot-1 nil))
+          (y (make :slot-1 t)))
+      (isnt vs:eqv x y))
+    (let ((x (make :slot-1 t))
+          (y (make :slot-1 nil)))
       (isnt vs:eqv x y))))
 
 (defclass other-test-class-with-value-semantics ()

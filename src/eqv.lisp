@@ -178,6 +178,9 @@
            ;; Handle possible comparison success.
            (when (and (null x) (null y) (null new-continuation))
              (return-from %eqv t))
+           ;; Handle only one of the values being null.
+           (when (a:xor x y)
+             (return-from %eqv nil))
            ;; If we're detecting cycles...
            (w:branch-when detect-cycles-p
              ;; ...then, have we already been here?
@@ -206,7 +209,7 @@
                          (lambda () (funcall comparator x y))
                          new-continuation)))
                  (t
-                  ;; No new values  - use the new continuation as-is.
+                  ;; No new values - use the new continuation as-is.
                   (setf continuation new-continuation)))
            ;; New continuation is set, time for a new iteration.
            (go :start))))))
