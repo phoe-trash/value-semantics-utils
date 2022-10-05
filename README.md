@@ -16,7 +16,7 @@ For such a programming style, the following assumptions should hold true:
   * It should be possible to use cyclic references for programming convenience.
 * It should be possible to consider a type mismatch an abnormal situation while comparing for equivalence.
   * It should be possible to use `:type` keyword arguments for class slots and have runtime assertions for type checks without risking undefined behavior or depending on implementation-defined behavior.
-* Value semantics should be used to compare data for ~~equality~~equivalence.
+* Value semantics should be used to compare data for equivalence.
   * Two Lisp objects should be recognized as equivalent if their types and contents are equivalent.
   * It should be possible to extend the equivalence predicate with user code.
   * Cyclic data structures which are impossible to tell apart value-wise (e.g. `#1=(1 2 3 . #1#)` and `#2=(1 2 3 1 2 3 . #2#)`) should be recognized as equivalent.
@@ -28,11 +28,12 @@ In order to be able to work with these assumptions, it is important to define [o
 
 ## Manual
 
-There are three sources of authority for the code in this repository:
+There are several sources of authority for the code in this repository:
 
 * the [`EQV` manual](doc/EQV.md),
 * the copier-modifier manual (TODO),
 * the [classes manual](doc/CLASSES.md),
+* the [set manual](doc/SET.md),
 * the [test suite](t/) containing more examples and edge cases.
 
 ## Testing
@@ -47,7 +48,7 @@ MIT.
 
 `EQV` contains only portable code should work on every Common Lisp implementation. The classes might not, because CLOS and MOP are hard.
 
-The classes were tested on SBCL 2.1.11 with some custom fixups. Nowhere else, yet. Expect breakage because of high doses of MOP wizardry, even though this library uses `closer-mop`.
+The classes were tested on SBCL 2.2.9 with some custom fixups. Nowhere else, yet. Expect breakage because of high doses of MOP wizardry, even though this library uses `closer-mop`.
 
 On SBCL, we need to wait for https://bugs.launchpad.net/sbcl/+bug/1956621 to get fixed ~~and for the [patch](https://sourceforge.net/p/sbcl/mailman/sbcl-devel/thread/6ae094ba-eeea-6bfe-b43d-970d97040830%40disroot.org/) that stabilizes behavior for failed `U-I-F-{R,D}-C` to get merged~~. Sigh. MOP is hard. MOP interactions with everything else are even harder.
 

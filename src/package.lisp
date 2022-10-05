@@ -1,5 +1,6 @@
 (uiop:define-package #:value-semantics-utils
   (:use #:c2cl)
+  (:shadow #:set #:set-difference #:set-exclusive-or)
   (:local-nicknames (#:a #:alexandria)
                     (#:u #:moptilities)
                     (#:w #:with-branching))
@@ -21,4 +22,8 @@
    #:typechecked-object
    #:typechecked-class
    ;; TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS
-   #:typechecked-class-with-value-semantics))
+   #:typechecked-class-with-value-semantics
+   ;; SET
+   #:set #:set-test #:set-contents
+   #:set-insert #:set-remove #:set-find
+   #:set-difference #:set-union #:set-intersection #:set-exclusive-or))
