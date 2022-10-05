@@ -13,6 +13,10 @@
 (defun set (&rest contents)
   (make-instance 'set :contents contents 'count (length contents)))
 
+(defmethod print-object ((object set) stream)
+  (print-unreadable-object (object stream :type t :identity t)
+    (format stream "~S" (set-contents object))))
+
 (defmethod shared-initialize :after ((set set) slots &key)
   (a:coercef (slot-value set 'test) 'function)
   (unless (slot-boundp set 'count)

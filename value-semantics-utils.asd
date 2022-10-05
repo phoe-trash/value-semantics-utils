@@ -17,16 +17,17 @@
                (:file "always-bound-class")
                (:file "typechecked-class")
                (:file "typechecked-class-with-value-semantics")
+               (:file "set")
                (:file "documentation"))
   :in-order-to ((test-op (load-op #:value-semantics-utils/test)))
   :perform
   (test-op (o c)
-           (symbol-call
-            '#:parachute '#:test
-            (find-symbol (symbol-name '#:value-semantics-utils)
-                         (find-package '#:value-semantics-utils/test))
-            :report (find-symbol "INTERACTIVE"
-                                 "PARACHUTE"))))
+    (symbol-call
+     '#:parachute '#:test
+     (find-symbol (symbol-name '#:value-semantics-utils)
+                  (find-package '#:value-semantics-utils/test))
+     :report (find-symbol "INTERACTIVE"
+                          "PARACHUTE"))))
 
 (asdf:defsystem #:value-semantics-utils/test
   :description "Tests for value-semantics-utils"
@@ -45,4 +46,5 @@
                (:file "class-with-value-semantics")
                (:file "always-bound-class")
                (:file "typechecked-class")
-               (:file "typechecked-class-with-value-semantics")))
+               (:file "typechecked-class-with-value-semantics")
+               (:file "set")))

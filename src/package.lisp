@@ -24,6 +24,6 @@
    ;; TYPECHECKED-CLASS-WITH-VALUE-SEMANTICS
    #:typechecked-class-with-value-semantics
    ;; SET
-   #:set #:set-test #:set-contents
+   #:set #:set-test #:set-contents #:set-count
    #:set-insert #:set-remove #:set-find
    #:set-difference #:set-union #:set-intersection #:set-exclusive-or))
