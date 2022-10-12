@@ -86,6 +86,11 @@
         (values (car foundp) t)
         (values nil nil))))
 
+;; TODO document this and dict-map
+(defun set-map (function set)
+  (dolist (element (set-contents set))
+    (funcall function element)))
+
 (macrolet ((make (name operator)
              `(defun ,name (x y &key (key #'identity))
                 (let ((contents (,operator (set-contents x)

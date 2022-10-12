@@ -49,6 +49,10 @@
 (defun dict-find (dict key &key ((:key key-fn) #'identity))
   (cdr (set-find (dict-set dict) key :key (a:compose key-fn #'car))))
 
+(defun dict-map (function set)
+  (dolist (element (dict-contents set))
+    (funcall function (car element) (cdr element))))
+
 (macrolet ((make (name operator)
              `(defun ,name (x y &key ((:key key-fn) #'identity))
                 (let ((set (,operator (dict-set x)

@@ -25,13 +25,13 @@
    #:typechecked-class-with-value-semantics
    ;; SET
    #:set #:set-test #:set-contents #:set-count
-   #:set-insert #:set-remove #:set-find
+   #:set-insert #:set-remove #:set-find #:set-map
    #:set-union #:set-intersection #:set-difference #:set-exclusive-or
    ;; TODO document test
    #:set-union* #:set-intersection*
    ;; DICT
    #:dict #:dict-test #:dict-contents #:dict-count
-   #:dict-insert #:dict-remove #:dict-find
+   #:dict-insert #:dict-remove #:dict-find #:set-map
    #:dict-union #:dict-intersection #:dict-difference #:dict-exclusive-or
    ;; TODO document test
    #:dict-union* #:dict-intersection*))
