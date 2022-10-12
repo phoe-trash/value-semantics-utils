@@ -12,14 +12,14 @@
   (declare (ignore set))
   (unless setp
     (setf (slot-value dict 'set)
-          (make-instance 'set :test test :contents contents))))
+          (make-instance 'set :test test :contents (a:plist-alist contents)))))
 
 (defmethod reinitialize-instance :after
     ((dict dict) &key (set nil setp) (test #'eqv) (contents '() contentsp))
   (declare (ignore set))
   (when (and (null setp) contentsp)
     (setf (slot-value dict 'set)
-          (make-instance 'set :test test :contents contents))))
+          (make-instance 'set :test test :contents (a:plist-alist contents)))))
 
 (defun dict (&rest contents)
   (make-instance 'dict :set (apply #'set (a:plist-alist contents))))
