@@ -7,19 +7,20 @@
   ((set :initarg :set :reader dict-set))
   (:metaclass class-with-value-semantics))
 
-(defmethod initialize-instance :after
-    ((dict dict) &key (set nil setp) (test #'eqv) (contents '()))
-  (declare (ignore set))
-  (unless setp
-    (setf (slot-value dict 'set)
-          (make-instance 'set :test test :contents (a:plist-alist contents)))))
-
-(defmethod reinitialize-instance :after
-    ((dict dict) &key (set nil setp) (test #'eqv) (contents '() contentsp))
+(defmethod shared-initialize :after
+    ((dict dict) slots
+     &key (set nil setp) (test #'eqv) (contents '() contentsp))
+  ;; TODO test SET and DICT for deduplication
   (declare (ignore set))
   (when (and (null setp) contentsp)
     (setf (slot-value dict 'set)
-          (make-instance 'set :test test :contents (a:plist-alist contents)))))
+          (make-instance 'set :test test :contents (a:plist-alist contents))))
+  (let* ((set (dict-set dict))
+         (test (set-test set))
+         (contents-1 (set-contents set))
+         (contents-2 (remove-duplicates contents-1 :key #'car :test test)))
+    (unless (= (length contents-1) (length contents-2))
+      (setf (slot-value set 'contents) contents-2))))
 
 (defun dict (&rest contents)
   (make-instance 'dict :set (apply #'set (a:plist-alist contents))))
