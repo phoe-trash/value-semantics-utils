@@ -2,6 +2,8 @@
 
 A functional set data structure with automatic deduplication. Linear time complexity of most operations; if you need something more performant and/or heavy-duty, use FSet.
 
+TODO: describe `DICT`.
+
 All symbols are exported from package `VALUE-SEMANTICS-UTILS`.
 
 ## Sets

@@ -18,6 +18,7 @@
                (:file "typechecked-class")
                (:file "typechecked-class-with-value-semantics")
                (:file "set")
+               (:file "dict")
                (:file "documentation"))
   :in-order-to ((test-op (load-op #:value-semantics-utils/test)))
   :perform
@@ -47,4 +48,5 @@
                (:file "always-bound-class")
                (:file "typechecked-class")
                (:file "typechecked-class-with-value-semantics")
-               (:file "set")))
+               (:file "set")
+               (:file "dict")))

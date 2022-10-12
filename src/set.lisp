@@ -67,27 +67,29 @@
     (if foundp set (copy set :contents (cons thing contents)
                          'count (1+ count)))))
 
-(defun set-remove (set thing)
+(defun set-remove (set thing &key (key #'identity))
   (let* ((contents (set-contents set))
          (count (set-count set))
-         (foundp (member thing contents :test (set-test set))))
+         (foundp (member thing contents :key key :test (set-test set))))
     (if (not foundp)
         set
-        (copy set :contents (remove thing contents
-                                    :test (set-test set))
+        (copy set :contents (remove thing contents :key key
+                                                   :test (set-test set))
               'count (1- count)))))
 
-(defun set-find (set thing)
+(defun set-find (set thing &key (key #'identity))
   (let* ((contents (set-contents set))
-         (foundp (member thing contents :test (set-test set))))
+         (foundp (member thing contents :key key
+                                        :test (set-test set))))
     (if foundp
-        (values thing t)
+        (values (car foundp) t)
         (values nil nil))))
 
 (macrolet ((make (name operator)
-             `(defun ,name (x y)
+             `(defun ,name (x y &key (key #'identity))
                 (let ((contents (,operator (set-contents x)
                                            (set-contents y)
+                                           :key key
                                            :test (set-test x))))
                   (copy x :contents contents 'count (length contents))))))
   (make set-difference cl:set-difference)
