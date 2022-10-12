@@ -54,7 +54,13 @@
                                       (dict-set y)
                                       :key (a:compose key-fn #'car))))
                   (copy x :set set)))))
-  (make dict-difference set-difference)
   (make dict-union set-union)
   (make dict-intersection set-intersection)
+  (make dict-difference set-difference)
   (make dict-exclusive-or set-exclusive-or))
+
+(defun dict-union* (x y &key (key #'identity))
+  (dict-union x (dict-difference y x :key key) :key key))
+
+(defun dict-intersection* (x y &key (key #'identity))
+  (dict-difference x (dict-exclusive-or x y :key key) :key key))

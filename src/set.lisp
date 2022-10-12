@@ -92,7 +92,13 @@
                                            :key key
                                            :test (set-test x))))
                   (copy x :contents contents 'count (length contents))))))
-  (make set-difference cl:set-difference)
   (make set-union union)
   (make set-intersection intersection)
+  (make set-difference cl:set-difference)
   (make set-exclusive-or cl:set-exclusive-or))
+
+(defun set-union* (x y &key (key #'identity))
+  (set-union x (set-difference y x :key key) :key key))
+
+(defun set-intersection* (x y &key (key #'identity))
+  (set-difference x (set-exclusive-or x y :key key) :key key))

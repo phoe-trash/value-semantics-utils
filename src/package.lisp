@@ -26,8 +26,12 @@
    ;; SET
    #:set #:set-test #:set-contents #:set-count
    #:set-insert #:set-remove #:set-find
-   #:set-difference #:set-union #:set-intersection #:set-exclusive-or
+   #:set-union #:set-intersection #:set-difference #:set-exclusive-or
+   ;; TODO document test
+   #:set-union* #:set-intersection*
    ;; DICT
    #:dict #:dict-test #:dict-contents #:dict-count
    #:dict-insert #:dict-remove #:dict-find
-   #:dict-difference #:dict-union #:dict-intersection #:dict-exclusive-or))
+   #:dict-union #:dict-intersection #:dict-difference #:dict-exclusive-or
+   ;; TODO document test
+   #:dict-union* #:dict-intersection*))
