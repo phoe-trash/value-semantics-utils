@@ -25,7 +25,8 @@
          (contents-1 (set-contents set))
          (contents-2 (remove-duplicates contents-1 :test test)))
     (unless (= (length contents-1) (length contents-2))
-      (setf (slot-value set 'contents) contents-2))))
+      (setf (slot-value set 'contents) contents-2
+            (slot-value set 'count) (length contents-2)))))
 
 (defmethod generic-eqv ((x set) (y set))
   (declare (optimize speed))

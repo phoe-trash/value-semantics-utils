@@ -20,7 +20,8 @@
          (contents-1 (set-contents set))
          (contents-2 (remove-duplicates contents-1 :key #'car :test test)))
     (unless (= (length contents-1) (length contents-2))
-      (setf (slot-value set 'contents) contents-2))))
+      (setf (slot-value set 'contents) contents-2
+            (slot-value set 'count) (length contents-2)))))
 
 (defun dict (&rest contents)
   (make-instance 'dict :set (apply #'set (a:plist-alist contents))))
