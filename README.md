@@ -20,7 +20,7 @@ For such a programming style, the following assumptions should hold true:
   * Two Lisp objects should be recognized as equivalent if their types and contents are equivalent.
   * It should be possible to extend the equivalence predicate with user code.
   * Cyclic data structures which are impossible to tell apart value-wise (e.g. `#1=(1 2 3 . #1#)` and `#2=(1 2 3 1 2 3 . #2#)`) should be recognized as equivalent.
-* For convenice and type safety, there should be a way to ensure, on the MOP level, that a slot in an instance is:
+* For convenience and type safety, there should be a way to ensure, on the MOP level, that a slot in an instance is:
   * meant to be always bound,
   * meant to always contain a value of a particular type.
 
