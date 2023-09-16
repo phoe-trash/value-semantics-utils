@@ -25,11 +25,26 @@
       (let ((dict-6 (vs:copy dict-2)))
         (is vs:eqv '((42 . 24)) (vs:dict-contents dict-6))))))
 
+(define-test dict-test-duplication
+  (let ((dict (make-instance 'vs:dict :test 'vs:eqv
+                                      :contents '((1 . 2) (1 . 3) (1 . 4)))))
+    (is = 1 (vs:dict-count dict))
+    (let ((element (cdr (first (vs:dict-contents dict)))))
+      (is member element '(2 3 4))))
+  (let* ((set (make-instance 'vs:set :test 'vs:eqv
+                                     :contents '((1 . 2) (1 . 3) (1 . 4))))
+         (dict (make-instance 'vs:dict :set set)))
+    (is = 1 (vs:dict-count dict))
+    (let ((element (cdr (first (vs:dict-contents dict)))))
+      (is member element '(2 3 4)))))
+
 (define-test dict-operations
   (let ((dict-1 (vs:dict 1 2 3 4))
         (dict-2 (vs:dict 3 4 5 6)))
     (let ((result (vs:dict-contents (vs:dict-difference dict-1 dict-2))))
       (is dict-equal '((1 . 2)) result))
+    (let ((result (vs:dict-contents (vs:dict-difference dict-2 dict-1))))
+      (is dict-equal '((5 . 6)) result))
     (let ((result (vs:dict-contents (vs:dict-union dict-1 dict-2))))
       (is dict-equal '((1 . 2) (3 . 4) (5 . 6)) result))
     (let ((result (vs:dict-contents (vs:dict-intersection dict-1 dict-2))))

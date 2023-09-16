@@ -87,3 +87,6 @@ See CLASS-WITH-VALUE-SEMANTICS")
 
 ;;; SET
 ;;; TODO
+
+;;; DICT
+;;; TODO

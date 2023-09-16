@@ -9,19 +9,21 @@
 
 (defmethod shared-initialize :after
     ((dict dict) slots
-     &key (set nil setp) (test #'eqv) (contents '() contentsp))
+     &key (set nil setp) (test #'eqv testp) (contents '() contentsp))
   ;; TODO test SET and DICT for deduplication
-  (declare (ignore set))
-  (when (and (null setp) contentsp)
-    (setf (slot-value dict 'set)
-          (make-instance 'set :test test :contents (a:plist-alist contents))))
-  (let* ((set (dict-set dict))
-         (test (set-test set))
-         (contents-1 (set-contents set))
-         (contents-2 (remove-duplicates contents-1 :key #'car :test test)))
-    (unless (= (length contents-1) (length contents-2))
-      (setf (slot-value set 'contents) contents-2
-            (slot-value set 'count) (length contents-2)))))
+  ;; TODO separate tests for keys and values?
+  (when (and set (not testp))
+    (setf test (set-test set)))
+  (cond ((and setp contentsp)
+         (error "Can't provide both SET and CONTENTS when creating a dict."))
+        ((and (null setp) (null contentsp))
+         (setf (slot-value dict 'set) (make-instance 'set :test test)))
+        ((a:xor setp contentsp)
+         (let* ((contents (cond (setp (set-contents set))
+                                (contentsp (a:plist-alist contents))))
+                (contents (remove-duplicates contents :key #'car :test test)))
+           (setf (slot-value dict 'set)
+                 (make-instance 'set :test test :contents contents))))))
 
 (defun dict (&rest contents)
   (make-instance 'dict :set (apply #'set (a:plist-alist contents))))
