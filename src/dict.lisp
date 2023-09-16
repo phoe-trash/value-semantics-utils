@@ -51,6 +51,7 @@
 (defun dict-find (dict key &key ((:key key-fn) #'identity))
   (cdr (set-find (dict-set dict) key :key (a:compose key-fn #'car))))
 
+;;; TODO should this return something?
 (defun dict-map (function set)
   (dolist (element (dict-contents set))
     (funcall function (car element) (cdr element))))
@@ -66,6 +67,7 @@
   (make dict-difference set-difference)
   (make dict-exclusive-or set-exclusive-or))
 
+;;; TODO do we need those?
 (defun dict-union* (x y &key (key #'identity))
   (dict-union x (dict-difference y x :key key) :key key))
 
