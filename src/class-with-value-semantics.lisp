@@ -41,6 +41,15 @@
                        (t (values nil nil nil nil)))))))
         (value-semantics-continuation)))))
 
+(defvar *safe-to-reinitialize-instance* nil)
+
+(defmethod reinitialize-instance :before
+    ((object object-with-value-semantics) &key)
+  (unless *safe-to-reinitialize-instance*
+    (cerror "Reinitialize anyway."
+            "Attempted to reinitialize value-semantics-object ~S outside of ~
+             the COPY generic function." object)))
+
 (defgeneric copy (original &rest initargs)
   (:documentation "Performs copying of the original object.")
   (:method ((original object-with-value-semantics) &rest initargs)
@@ -51,7 +60,8 @@
       (dolist (slot slot-names)
         (when (slot-boundp original slot)
           (setf (slot-value copy slot) (slot-value original slot))))
-      (apply #'reinitialize-instance copy initargs))))
+      (let ((*safe-to-reinitialize-instance* t))
+        (apply #'reinitialize-instance copy initargs)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CLASS-WITH-VALUE-SEMANTICS
@@ -62,7 +72,6 @@
                                 (superclass standard-class))
   t)
 
-;; TODO methods on SHARED-INITIALIZE on classes are not portable
 (defmethod shared-initialize :around
     ((class class-with-value-semantics) slot-names
      &rest rest &key direct-superclasses)

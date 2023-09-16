@@ -69,7 +69,10 @@
   :parent typechecked-class-with-value-semantics
   (let ((instance (make-instance 'test-typechecked-class-with-value-semantics
                                  :slot-1 24 :slot-2 nil :slot-3 :foo)))
-    (reinitialize-instance instance :slot-3 :bar)
+    (fail (reinitialize-instance instance :slot-3 :bar))
+    ;; Normally this rebinding only happens as a part of the COPY function.
+    (let ((value-semantics-utils::*safe-to-reinitialize-instance* t))
+      (reinitialize-instance instance :slot-3 :bar))
     (is = 24 (slot-value instance 'slot-1))
     (is eq :bar (slot-value instance 'slot-3))))
 
