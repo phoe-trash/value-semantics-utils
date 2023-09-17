@@ -86,8 +86,7 @@
         (values (car foundp) t)
         (values nil nil))))
 
-;;; TODO document this and dict-map
-;;; TODO maybe return something?
+;;; TODO document dict-map
 (defun set-map (function set)
   (dolist (element (set-contents set))
     (funcall function element)))
