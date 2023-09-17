@@ -50,4 +50,7 @@
     (let ((result (vs:dict-contents (vs:dict-intersection dict-1 dict-2))))
       (is dict-equal '((3 . 4)) result))
     (let ((result (vs:dict-contents (vs:dict-exclusive-or dict-1 dict-2))))
-      (is dict-equal '((1 . 2) (5 . 6)) result))))
+      (is dict-equal '((1 . 2) (5 . 6)) result))
+    (let ((result '()))
+      (vs:dict-map (lambda (x y) (push (+ x y) result)) dict-1)
+      (is a:set-equal '(3 7) result))))

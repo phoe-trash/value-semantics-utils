@@ -31,7 +31,7 @@
    #:set-union* #:set-intersection*
    ;; DICT
    #:dict #:dict-test #:dict-contents #:dict-count
-   #:dict-insert #:dict-remove #:dict-find #:set-map
+   #:dict-insert #:dict-remove #:dict-find #:dict-map
    #:dict-union #:dict-intersection #:dict-difference #:dict-exclusive-or
    ;; TODO document test
    #:dict-union* #:dict-intersection*))

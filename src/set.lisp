@@ -87,7 +87,7 @@
         (values nil nil))))
 
 ;;; TODO document this and dict-map
-;;; TODO should this return something?
+;;; TODO maybe return something?
 (defun set-map (function set)
   (dolist (element (set-contents set))
     (funcall function element)))

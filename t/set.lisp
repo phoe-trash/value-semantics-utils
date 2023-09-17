@@ -33,4 +33,7 @@
     (let ((result (vs:set-contents (vs:set-intersection set-1 set-2))))
       (is a:set-equal '(3 4) result))
     (let ((result (vs:set-contents (vs:set-exclusive-or set-1 set-2))))
-      (is a:set-equal '(1 2 5 6) result))))
+      (is a:set-equal '(1 2 5 6) result))
+    (let ((result '()))
+      (vs:set-map (lambda (x) (push x result)) set-1)
+      (is a:set-equal '(1 2 3 4) (vs:set-contents set-1)))))

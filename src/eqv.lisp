@@ -39,7 +39,8 @@
   (values (eq x y) nil nil nil))
 
 (defmethod generic-eqv ((x symbol) (y symbol))
-  (declare (optimize speed))
+  (declare (optimize speed)
+           #+sbcl (sb-ext:muffle-conditions sb-ext:compiler-note))
   (let ((result (or (eq x y)
                     (and (null (symbol-package x))
                          (null (symbol-package y))

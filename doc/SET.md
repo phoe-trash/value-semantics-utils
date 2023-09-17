@@ -46,6 +46,12 @@ Lambda list: `(set-insert set thing)`
 
 If `SET` does not include `THING`, `(VALUES THING T)` is returned; otherwise, `(VALUES NIL NIL)` is returned.
 
+### **Function `SET-MAP`**
+
+Lambda list: `(set-map function set)`
+
+Calls `FUNCTION` on each element of `SET` in arbitrary order. Returns `NIL`.
+
 ### **Function `SET-DIFFERENCE`**
 
 Lambda list: `(set-difference x y)`
